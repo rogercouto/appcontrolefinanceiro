@@ -1,0 +1,62 @@
+<ion-header>
+    <ion-navbar>
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <ion-title>Transações</ion-title>
+    </ion-navbar>
+  </ion-header>
+  
+  <ion-content padding>
+      <h3>Conta: {{conta.descricao}}</h3>
+      <h4>
+        Saldo disponível: R$ {{(conta.saldo+conta.limite).toFixed(2)}}
+      </h4>
+      <p *ngIf="conta.limite > 0">* Saldo: R$ {{conta.saldo.toFixed(2)}} - Limite: R$ {{conta.limite.toFixed(2)}}</p>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+              <ion-label>
+              </ion-label>
+              + Nova transação
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <button ion-button block color="danger" (click)="debito()">
+                  <ion-icon name="trending-down"></ion-icon>&nbsp;&nbsp;Débito</button>
+            </ion-col>
+            <ion-col>
+              <button ion-button block color="secondary" (click)="credito()">
+                  <ion-icon name="trending-up"></ion-icon>&nbsp;&nbsp;Crédito</button>          
+            </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-item>
+          <ion-label>Período:</ion-label>
+          <ion-datetime  displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
+      </ion-item>
+      <ion-list>
+          <ion-item *ngFor="let transacao of transacoes">
+            <ion-icon name="{{ (transacao.valor < 0 ? 'trending-down' : 'trending-up')}}"
+              color="{{ (transacao.valor < 0 ? 'danger' : 'secondary')}}"></ion-icon>
+            &nbsp;  
+            {{transacao.dataHoraVencimento | date: 'dd/MM'}} - 
+            R$: {{ (transacao.valor < 0 ? '('+(transacao.valor*-1).toFixed(2)+')' : transacao.valor.toFixed(2))}}
+            <ion-icon *ngIf="transacao.dataHoraPagamento != null" name="checkmark"  color="primary" item-end></ion-icon>  
+            <button color="light" ion-button icon-only  item-end (click)="selecionaTransacao(transacao)">
+                <ion-icon name="create"></ion-icon>
+            </button>
+          </ion-item>
+      </ion-list>
+      <ion-card>
+          <ion-card-header>
+            <h5>Balanço no período</h5>
+          </ion-card-header>
+          <ion-card-content>
+            <p>&nbsp;&nbsp;&nbsp;Atual: R$ {{balancoAtual != undefined ? balancoAtual.toFixed(2) : 0.00}}</p>
+            <p>Previsto: R$ {{balancoPrevisto != undefined ? balancoPrevisto.toFixed(2) : 0.00}}</p>
+          </ion-card-content>
+        </ion-card>
+    </ion-content>
+  

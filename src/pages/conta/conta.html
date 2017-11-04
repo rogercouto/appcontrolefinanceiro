@@ -1,0 +1,23 @@
+<ion-header>
+    <ion-navbar>
+      <ion-title>{{conta.id == null ? 'Nova conta' : 'Editar conta'}}</ion-title>
+    </ion-navbar>
+    </ion-header>
+    <ion-content padding>
+      <form (ngSubmit)="salvaConta()">
+        <ion-item>
+            <ion-label floating [color]="descrColor">Descrição</ion-label>
+            <ion-input type="text" name="descricao" [(ngModel)]="conta.descricao" (ionChange)="checkForm()"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label floating>Saldo</ion-label>
+            <ion-input type="number" max="10" name="saldo" [(ngModel)]="conta.saldo"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label floating>Limite</ion-label>
+            <ion-input type="number" max="10" name="limite" [(ngModel)]="conta.limite"></ion-input>
+        </ion-item>
+        <br/>
+        <button [disabled]="!valid" ion-button block type="submit">Salvar</button>
+      </form>
+    </ion-content>

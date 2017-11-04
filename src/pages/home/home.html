@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Início</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <h3>Resumo das contas</h3>
+  <ion-card *ngFor="let conta of contas">
+    <ion-card-header>
+        <ion-item>
+            <ion-label>{{conta.descricao}}</ion-label>
+            <ion-radio value="selection" [checked]="isSel(conta)" (click)="selecionaConta(conta)"></ion-radio>
+        </ion-item>
+        <!--
+          &nbsp;
+        <ion-icon *ngIf="isSel(conta)" name="checkmark" color="secondary" style="font-size: 30px"></ion-icon>
+        <button *ngIf="!isSel(conta)" (click)="selecionaConta(conta)" ion-button icon-only color="light">
+            <ion-icon name="checkmark-circle"></ion-icon>
+        </button>
+      -->
+    </ion-card-header>
+    <ion-card-content>
+      <p>Saldo R$: {{conta.saldo.toFixed(2)}}</p>
+      <p *ngIf="conta.limite > 0">
+        Limite: R$: {{conta.limite.toFixed(2)}}<br />
+        Saldo disponível: R$: {{(conta.saldo+conta.limite).toFixed(2)}}
+      </p> 
+      <p>
+        <button ion-button icon-only (click)="editaConta(conta)" color="light">
+            <ion-icon name="create"></ion-icon>
+        </button>
+        <button ion-button icon-only (click)="excluiConta(conta)" color="light">
+            <ion-icon name="trash"></ion-icon>
+        </button>
+      </p>
+    </ion-card-content>
+  </ion-card>
+  <p style="text-align: right">
+      <button ion-button (click)="insereConta()" color="secondary">
+          <ion-icon name="add"></ion-icon>
+          <ion-label>&nbsp;Nova conta</ion-label>
+      </button>
+  </p>
+</ion-content>
