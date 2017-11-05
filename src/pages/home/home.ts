@@ -36,7 +36,7 @@ export class HomePage {
 
   selecionaConta(conta: Conta){
     this.contaSel = conta;
-    this.configProvider.selectionaConta(this.contaSel.id);
+    this.configProvider.selecionaConta(this.contaSel.id);
   }
 
   insereConta(){

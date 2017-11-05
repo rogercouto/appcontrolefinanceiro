@@ -5,9 +5,10 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { IonicStorageModule } from '@ionic/storage';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 
 import { MyApp } from './app.component';
-import { HomePage, ContaPage, TransacoesPage, DebitoPage, CreditoPage } from '../pages';
+import { HomePage, ContaPage, TransacoesPage, DebitoPage, CreditoPage, ConfigPage } from '../pages';
 import { ContaProvider } from '../providers';
 import { TransacaoProvider } from '../providers/transacao/transacao';
 import { ConfigProvider } from '../providers/config/config';
@@ -20,7 +21,8 @@ import { ConfigProvider } from '../providers/config/config';
     ContaPage,
     TransacoesPage,
     DebitoPage,
-    CreditoPage
+    CreditoPage,
+    ConfigPage
   ],
   imports: [
     BrowserModule,
@@ -38,15 +40,17 @@ import { ConfigProvider } from '../providers/config/config';
     ContaPage,
     TransacoesPage,
     DebitoPage,
-    CreditoPage
+    CreditoPage,
+    ConfigPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
+    LocalNotifications,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     ContaProvider,
     TransacaoProvider,
-    ConfigProvider
+    ConfigProvider,
   ]
 })
 export class AppModule {}

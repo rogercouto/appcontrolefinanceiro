@@ -2,11 +2,12 @@ import { Component, ViewChild } from '@angular/core';
 import { Nav, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 import { AlertController } from 'ionic-angular';
 
-import { HomePage, TransacoesPage } from '../pages';
+import { HomePage, TransacoesPage, ConfigPage } from '../pages';
 import { Conta } from '../model';
-import { ContaProvider, ConfigProvider } from '../providers';
+import { ContaProvider, TransacaoProvider, ConfigProvider } from '../providers';
 
 @Component({
   templateUrl: 'app.html'
@@ -25,16 +26,42 @@ export class MyApp {
     public statusBar: StatusBar,
     public splashScreen: SplashScreen, 
     private contaProvider: ContaProvider,
+    private transacaoProvider: TransacaoProvider,
     private configProvider: ConfigProvider,
+    private localNotifications: LocalNotifications,
     private alertCtrl: AlertController) 
     {
+      //console.log(new Date());
+      this.giveAlert();
       this.initializeApp();
       this.pages = [
         { title: 'Contas', component: HomePage },      
-        { title: 'Transações', component: TransacoesPage }
+        { title: 'Transações', component: TransacoesPage },
+        { title: 'Definições', component: ConfigPage}
       ];
       const index = this.configProvider.getPaginaSel();//pagina acessada por útlimo
       this.rootPage = index < 0 ? HomePage : this.pages[index].component;
+  }
+
+  giveAlert(){
+    //let showT = false;
+    this.localNotifications.on("click", (notification, state) => {
+      //showT = true;
+      let data = JSON.parse(notification.data);
+      let alert = this.alertCtrl.create({
+          title: notification.title,
+          subTitle: data.message,
+          buttons : [
+            {
+              text: "Ok",
+              handler: data => {
+                this.transacaoProvider.atualizaNotificacoes();
+                this.openPage(this.pages[1]);
+              }
+          }]
+      });
+      alert.present();
+    });
   }
 
   initializeApp() {
@@ -69,7 +96,7 @@ export class MyApp {
       });
       alert.present();
     }else{
-      this.configProvider.selectionaPagina(this.getPageIndex(page));
+      this.configProvider.selecionaPagina(this.getPageIndex(page));
       this.nav.setRoot(this.page.component);
     }
   }
@@ -80,7 +107,7 @@ export class MyApp {
 
   trocaConta(conta : Conta){
     this.conta = conta;
-    this.configProvider.selectionaConta(this.conta.id);
+    this.configProvider.selecionaConta(this.conta.id);
     if(!this.page)
       this.page = this.pages[0];
     if (this.page != null){

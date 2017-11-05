@@ -1,0 +1,32 @@
+<!--
+  Generated template for the ConfigPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Definições</ion-title>
+  </ion-navbar>
+
+</ion-header>
+<ion-content padding>
+  <ion-item>
+    <ion-label color="dark">Notificações ativas: </ion-label>
+    <ion-checkbox [(ngModel)]="notificacoesAtivas"></ion-checkbox>
+  </ion-item>
+  <ion-item>
+    <ion-label color="dark">Horário das notificações: </ion-label>
+    <ion-datetime [disabled]="!notificacoesAtivas" displayFormat="HH:mm" [(ngModel)]="time"></ion-datetime>
+  </ion-item>
+  <ion-item>
+    <ion-label color="dark">Cria evento calendário: </ion-label>
+    <ion-checkbox [(ngModel)]="notificaCalendario"></ion-checkbox>
+  </ion-item>
+  <br/>
+  <button ion-button block (click)="salvarConfigs()">Salvar</button>
+</ion-content>

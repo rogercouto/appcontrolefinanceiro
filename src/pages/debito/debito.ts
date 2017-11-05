@@ -25,7 +25,10 @@ export class DebitoPage {
 
   public colors: Array<string> = ["dark","dark","dark"];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams,private transacaoProvider: TransacaoProvider) {
+  constructor(public navCtrl: NavController,
+    public navParams: NavParams,
+    private transacaoProvider: TransacaoProvider
+  ) {
     this.conta = navParams.get("contaParam");
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
@@ -81,6 +84,7 @@ export class DebitoPage {
       this.transacaoProvider.insertTransacao(this.conta, this.transacao);
     else
       this.transacaoProvider.updateTransacao(this.conta, this.transacao);
+      //tirei notificação daqui
     this.navCtrl.setRoot(TransacoesPage, { contaParam : this.conta});
   }
 

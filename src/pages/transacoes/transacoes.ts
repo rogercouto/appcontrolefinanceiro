@@ -24,6 +24,8 @@ export class TransacoesPage {
   public transacoes: Array<Transacao> = [];
   public balancoPrevisto: number;
   public balancoAtual: number;
+  public sortByDate:number = 1;
+  public sortByPag:number = 1;
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
@@ -52,8 +54,28 @@ export class TransacoesPage {
     this.balancoPrevisto = Number(this.balancoPrevisto);
   }
 
+  changeSortByDate(){
+    this.sortByDate *= -1;
+    this.refresh();
+  }
+
+  changeSortByPag(){
+    this.sortByPag *= -1;
+    this.refresh();
+  }
+
   refresh(){
     this.transacoes = this.transacaoProvider.getTransacoes(this.conta, this.periodo);
+    const sd = this.sortByDate;
+    const sp = this.sortByPag;
+    this.transacoes.sort(function(t1:Transacao,t2:Transacao){
+      if (t1.dataHoraPagamento == null && t2.dataHoraPagamento != null)
+        return (-1*sp);
+      else if(t1.dataHoraPagamento != null && t2.dataHoraPagamento == null)
+        return  (1*sp);
+      else
+        return  (t2.dataHoraVencimento.getTime() - t1.dataHoraVencimento.getTime()) * sd;
+    });
     this.calculaBalanco();
   }
 
