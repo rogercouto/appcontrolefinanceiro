@@ -6,29 +6,28 @@
       <ion-title>Transações</ion-title>
     </ion-navbar>
   </ion-header>
-  
   <ion-content padding>
       <h3>Conta: {{conta.descricao}}</h3>
       <h4>
-        Saldo disponível: R$ {{(conta.saldo+conta.limite).toFixed(2)}}
+        Saldo disponível: R$ {{(conta.saldo+conta.limite).toFixed(2).toString().replace('.',',')}}
       </h4>
-      <p *ngIf="conta.limite > 0">* Saldo: R$ {{conta.saldo.toFixed(2)}} - Limite: R$ {{conta.limite.toFixed(2)}}</p>
+      <p *ngIf="conta.limite > 0">* Saldo: R$ {{conta.saldo.toFixed(2).toString().replace('.',',')}} - Limite: R$ {{conta.limite.toFixed(2).toString().replace('.',',')}}</p>
       <ion-grid>
         <ion-row>
           <ion-col>
               <ion-label>
+                <ion-icon name="play" style="font-size: 25px"></ion-icon>&nbsp; Nova transação
               </ion-label>
-              + Nova transação
             </ion-col>
           </ion-row>
           <ion-row>
             <ion-col>
               <button ion-button block color="danger" (click)="debito()">
-                  <ion-icon name="trending-down"></ion-icon>&nbsp;&nbsp;Débito</button>
+                  <ion-icon name="remove-circle" style="font-size: 23px"></ion-icon>&nbsp;&nbsp;Débito</button>
             </ion-col>
             <ion-col>
               <button ion-button block color="secondary" (click)="credito()">
-                  <ion-icon name="trending-up"></ion-icon>&nbsp;&nbsp;Crédito</button>          
+                  <ion-icon name="add-circle" style="font-size: 23px"></ion-icon>&nbsp;&nbsp;Crédito</button>          
             </ion-col>
         </ion-row>
       </ion-grid>
@@ -49,25 +48,111 @@
           <ion-icon item-end style="width:20px"></ion-icon>
       </ion-item>
       <ion-list>
+          <!-- 'trending-down' : 'trending-up' border-radius: 50%; background-color: #DDD; -->
           <ion-item *ngFor="let transacao of transacoes">
-            <ion-icon name="{{ (transacao.valor < 0 ? 'trending-down' : 'trending-up')}}"
-              color="{{ (transacao.valor < 0 ? 'danger' : 'secondary')}}"></ion-icon>
-            &nbsp;  
-            {{transacao.dataHoraVencimento | date: 'dd/MM'}} - 
-            R$: {{ (transacao.valor < 0 ? '('+(transacao.valor*-1).toFixed(2)+')' : transacao.valor.toFixed(2))}}
+            <ion-icon name="{{ (transacao.valor < 0 ? 'remove-circle' : 'add-circle')}}"
+              color="{{ (transacao.valor < 0 ? 'danger' : 'secondary')}}" style="font-size: 23px;"></ion-icon>
+            &nbsp;
+            {{transacao.dataHoraVencimento | date: 'dd/MM'}} - R$:&nbsp;
+            <span *ngIf="transacao.valor<0" style="color: red">
+                ({{(transacao.valor*-1).toFixed(2).toString().replace('.',',')}})
+            </span>
+            <span *ngIf="transacao.valor>=0" style="color: green">
+                {{transacao.valor.toFixed(2).toString().replace('.',',')}}
+            </span>
+            <!--
+            {{ (transacao.valor < 0 ? '('+(transacao.valor*-1).toFixed(2).toString().replace('.',',')+')' : transacao.valor.toFixed(2).toString().replace('.',','))}}<br/>
+            -->
+            <br/>
             <ion-icon *ngIf="transacao.dataHoraPagamento != null" name="checkmark"  color="primary" item-end></ion-icon>  
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{transacao.descricao}}</p>
             <button color="light" ion-button icon-only  item-end (click)="selecionaTransacao(transacao)">
-                <ion-icon name="create"></ion-icon>
-            </button>
+              <ion-icon name="create"></ion-icon>
+            </button>            
           </ion-item>
       </ion-list>
-      <ion-card color="light">
+      <ion-card  color="light">
           <ion-card-header>
-            <h5>Balanço no período</h5>
+            <button (click)="mostraBalanco = !mostraBalanco" ion-item color="light">
+                <ion-icon name="arrow-dropdown" item-end></ion-icon>
+                <strong>Balanço no período</strong>
+            </button>
           </ion-card-header>
-          <ion-card-content>
-            <p>&nbsp;&nbsp;&nbsp;Atual: R$ {{balancoAtual != undefined ? balancoAtual.toFixed(2) : 0.00}}</p>
-            <p>Previsto: R$ {{balancoPrevisto != undefined ? balancoPrevisto.toFixed(2) : 0.00}}</p>
+          <ion-card-content *ngIf="mostraBalanco">
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <strong>Débitos</strong>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                  <ion-col>
+                    Pendentes:
+                  </ion-col>
+                  <ion-col style="text-align: right">
+                      R$ ({{(totalDebitoPendente*-1).toFixed(2).toString().replace('.',',')}})
+                  </ion-col>
+                </ion-row>
+              <ion-row>
+                <ion-col>
+                  Pagos:
+                </ion-col>
+                <ion-col style="text-align: right">
+                     R$ ({{(totalDebitoPago*-1).toFixed(2).toString().replace('.',',')}})
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                  <ion-col>
+                    <strong>Créditos</strong>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>
+                    pendentes:
+                  </ion-col>
+                  <ion-col style="text-align: right">
+                    R$ {{totalCreditoPendente.toFixed(2).toString().replace('.',',')}}
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>
+                    pagos:
+                  </ion-col>
+                  <ion-col style="text-align: right">
+                      R$ {{totalCreditoPago.toFixed(2).toString().replace('.',',')}}
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>
+                    <strong>Total:</strong>
+                  </ion-col>
+                  <ion-col style="text-align: right">
+                    <strong>
+                      <span *ngIf="totalPago < 0" style="color: red">
+                        R$ ({{(totalPago*-1).toFixed(2).toString().replace('.',',').toString().replace('.',',')}})
+                      </span>
+                      <span *ngIf="totalPago > 0" style="color: green">
+                          R$ {{totalPago.toFixed(2).toString().replace('.',',').toString().replace('.',',')}}
+                      </span>
+                    </strong>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                    <ion-col>
+                      <strong>Total previsto:</strong>
+                    </ion-col>
+                    <ion-col style="text-align: right">
+                      <strong>
+                          <span *ngIf="totalPrevisto < 0" style="color: red">
+                            R$ ({{(totalPrevisto*-1).toFixed(2).toString().replace('.',',').toString().replace('.',',')}})
+                          </span>
+                          <span *ngIf="totalPrevisto > 0" style="color: green">
+                              R$ {{totalPrevisto.toFixed(2).toString().replace('.',',').toString().replace('.',',')}}
+                          </span>
+                        </strong>
+                    </ion-col>
+                  </ion-row>
+            </ion-grid>
           </ion-card-content>
         </ion-card>
     </ion-content>

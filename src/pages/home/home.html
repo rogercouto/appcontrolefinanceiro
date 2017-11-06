@@ -24,10 +24,10 @@
       -->
     </ion-card-header>
     <ion-card-content>
-      <p>Saldo R$: {{conta.saldo.toFixed(2)}}</p>
+      <p>Saldo R$: {{conta.saldo.toFixed(2).toString().replace('.',',')}}</p>
       <p *ngIf="conta.limite > 0">
-        Limite: R$: {{conta.limite.toFixed(2)}}<br />
-        Saldo disponível: R$: {{(conta.saldo+conta.limite).toFixed(2)}}
+        Limite: R$: {{conta.limite.toFixed(2).toString().replace('.',',')}}<br />
+        Saldo disponível: R$: {{(conta.saldo+conta.limite).toFixed(2).toString().replace('.',',')}}
       </p> 
       <p>
         <button ion-button icon-only (click)="editaConta(conta)" color="light">

@@ -33,6 +33,8 @@ export class DebitoPage {
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
       this.dataVenc = this.transacao.dataHoraVencimento.toISOString().substring(0,10);
+      if (this.transacao.valor < 0)
+        this.transacao.valor *= -1;
     }else{
       this.transacao = new Transacao();
     } 

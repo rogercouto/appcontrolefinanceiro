@@ -22,8 +22,13 @@ export class TransacoesPage {
   public conta: Conta;
   public periodo: string = new Date().toISOString().substring(0, 7);
   public transacoes: Array<Transacao> = [];
-  public balancoPrevisto: number;
-  public balancoAtual: number;
+
+  public mostraBalanco = false;
+  public totalCredito: number = 0;
+  public totalCreditoPago: number = 0;
+  public totalDebito: number = 0;
+  public totalDebitoPago: number = 0;
+
   public sortByDate:number = 1;
   public sortByPag:number = 1;
 
@@ -43,16 +48,43 @@ export class TransacoesPage {
   }
 
   calculaBalanco(){
-    this.balancoAtual = 0;
-    this.balancoPrevisto = 0;
+    this.totalCredito = 0;
+    this.totalCreditoPago = 0;
+    this.totalDebito = 0;
+    this.totalDebitoPago = 0;
     for (let transacao of this.transacoes){
-      this.balancoPrevisto += transacao.valor;
-      if (transacao.dataHoraPagamento != null)
-        this.balancoAtual += transacao.valor;
+      if (transacao.valor < 0){
+        this.totalDebito += transacao.valor;
+        if (transacao.dataHoraPagamento != null)
+          this.totalDebitoPago += transacao.valor;
+      }else{
+        this.totalCredito += transacao.valor;
+        if (transacao.dataHoraPagamento != null)
+          this.totalCreditoPago += transacao.valor;
+      }
     }
-    this.balancoAtual = Number(this.balancoAtual);
-    this.balancoPrevisto = Number(this.balancoPrevisto);
+    this.totalCreditoPago = Number(this.totalCreditoPago);
+    this.totalCredito = Number(this.totalCredito);
+    this.totalDebitoPago = Number(this.totalDebitoPago);
+    this.totalDebito = Number(this.totalDebito);
   }
+
+  get totalDebitoPendente(){
+    return Number(this.totalDebito - this.totalDebitoPago);
+  }
+
+  get totalCreditoPendente(){
+    return Number(this.totalCredito - this.totalCreditoPago);
+  }
+
+  get totalPago(){
+    return Number(this.totalCreditoPago + this.totalDebitoPago);
+  }
+
+  get totalPrevisto(){
+    return Number(this.totalCredito + this.totalDebito);
+  }
+
 
   changeSortByDate(){
     this.sortByDate *= -1;
@@ -91,8 +123,8 @@ export class TransacoesPage {
 
   selecionaTransacao(transacao: Transacao): void{
     let prompt = this.alertCtrl.create({
-     title: 'Transação: '+transacao.descricao,
-     message: 'Selecione a opção: ',
+     title: transacao.descricao,
+     message: 'Selecione a opção: </strong>',
      buttons : [
       {
         text: "Editar",

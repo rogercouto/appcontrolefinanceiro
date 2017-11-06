@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { AlertController } from 'ionic-angular';
 
 import { Nota } from '../../model';
 import { NotaProvider } from '../../providers';
@@ -26,8 +25,7 @@ export class NotasPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public notaProvider: NotaProvider,
-    private alertCtrl: AlertController
+    public notaProvider: NotaProvider
   ) {
     this.notas = this.notaProvider.getNotas(this.vis);
   }
@@ -46,57 +44,6 @@ export class NotasPage {
 
   select(nota: Nota){
     this.navCtrl.push(NotaPage, {notaParam: nota}); 
-    /*
-    let prompt = this.alertCtrl.create({
-      title: 'Ações',
-      message: 'Selecione a opção: ',
-      buttons : [
-       {
-         text: "Editar",
-         handler: data => {
-          this.navCtrl.push(NotaPage, {notaParam: nota}); 
-         }
-       },
-       {
-         text: "Excluir",
-         handler: data => {
-           let pronptExclude = this.alertCtrl.create({
-             title: 'Atenção!',
-             message: 'Confirma exclusão da nota?',
-             buttons:[
-               {
-                 text: 'Sim',
-                 handler: data =>{
-                   this.notaProvider.delete(nota);
-                   this.refresh();
-                 }
-               },
-               {
-                 text: 'Não'
-               }
-             ]
-           });
-           pronptExclude.present();
-         }
-       },
-       {
-         text: !nota.arquivada ? "Arquivar" : "Desarquivar",
-         handler: data => {
-          nota.arquivada = !nota.arquivada; 
-          this.notaProvider.updateNota(nota);
-          this.refresh();
-         }
-       },
-       {
-         text: "Cancelar",
-         handler: data => {
-         }
-       }
-      ]
-      });
-      prompt.present();
-      this.refresh();
-      */
-    }
+  }
     
 }

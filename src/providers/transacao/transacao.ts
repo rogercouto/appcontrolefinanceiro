@@ -154,7 +154,7 @@ export class TransacaoProvider {
     alert.present();
     const msg = (debito?'Débito':'Crédito')+
       ' de R$ '+
-      valor.toFixed(2)+
+      valor.toFixed(2).toString().replace('.',',')+
       ' referente a '+
       transacao.descricao+
       ' vencendo hoje!';
