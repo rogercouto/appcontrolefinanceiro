@@ -106,9 +106,23 @@ export class TransacoesPage {
       {
         text: "Excluir",
         handler: data => {
-          //criar janela perguntando depois
-          this.transacaoProvider.deleteTransacao(this.conta, transacao);
-          this.refresh();
+          let pronptExclude = this.alertCtrl.create({
+            title: 'Atenção!',
+            message: 'Confirma exclusão da transação?',
+            buttons:[
+              {
+                text: 'Sim',
+                handler: data =>{
+                  this.transacaoProvider.deleteTransacao(this.conta, transacao);
+                  this.refresh();
+                }
+              },
+              {
+                text: 'Não'
+              }
+            ]
+          });
+          pronptExclude.present();
         }
       },
       {

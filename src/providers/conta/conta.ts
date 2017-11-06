@@ -69,6 +69,14 @@ export class ContaProvider {
     const contas = this.getContas();
     contas.splice(index ,1);
     localStorage['contas'] = JSON.stringify(contas);
+    //deletar transações da conta
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,15) == 't_'+conta.id){
+        localStorage.removeItem[key];
+      }
+    }
+
   }
 
 }

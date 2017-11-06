@@ -182,12 +182,14 @@ export class TransacaoProvider {
     const horarioNot = this.configProvider.getHorarioNotificacao();
     dataHoraNot.setHours(horarioNot.h);
     dataHoraNot.setMinutes(horarioNot.m);
+    /*
     let alert = this.alertCtrl.create({
       title: 'Próxima notificação: ',
       subTitle: 'Data:'+dataHoraNot.toLocaleString(),
       buttons: ['Ok']
     });
     alert.present();
+    */
     this.localNotifications.schedule({
       title: 'Atenção',
       text: 'Você tem transações pendentes para hoje!',
@@ -220,7 +222,7 @@ export class TransacaoProvider {
         for (let transacao of transacoes) {
           if (!this.ignoraNotificacao(transacao) && !this.passouPrazo(transacao)){
             this.registraProximaNotificacao(transacao);
-            break;
+            return;
           }
         }  
       }

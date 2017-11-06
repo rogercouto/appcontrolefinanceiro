@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>{{ nota.id == null ? 'Nova nota' : 'Editar nota' }}</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+    <form (ngSubmit)="salvar()">
+        <ion-item>
+            <ion-label floating [color]="descrColor">Título</ion-label>
+            <ion-input type="text" name="titulo" [(ngModel)]="nota.titulo"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-textarea rows="10" name="texto" [(ngModel)]="nota.texto" style="background-color: rgb(255, 254, 177)"></ion-textarea>
+        </ion-item>
+        <ion-item>
+            <ion-label *ngIf="nota.id != null" for="arquivada">Arquivada</ion-label>
+            <ion-checkbox *ngIf="nota.id != null" name="arquivada" [(ngModel)]="nota.arquivada" item-end>
+              Arquivada
+            </ion-checkbox>
+        </ion-item>
+        <br/>
+        <button [disabled]="nota.titulo == undefined || nota.titulo.length == 0" ion-button block type="submit">Salvar</button> 
+      </form>
+      <br/>
+      <button *ngIf="nota.id != null" ion-button block color="danger" (click)="excluir()">Excluir</button>
+</ion-content>

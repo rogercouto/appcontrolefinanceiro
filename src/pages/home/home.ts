@@ -53,16 +53,14 @@ export class HomePage {
       message: 'Deseja mesmo excluir a conta? ',
       buttons : [
        {
-         text: "Confirmar",
+         text: "Sim",
          handler: data => {
           this.contaProvider.deleteConta(conta);
           this.contas = this.contaProvider.getContas();
          }
        },
        {
-         text: "Cancelar",
-         handler: data => {
-         }
+         text: "Cancelar"
        }
       ]
       });

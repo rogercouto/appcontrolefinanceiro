@@ -36,12 +36,14 @@
           <ion-label>Período:</ion-label>
           <ion-datetime  displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
       </ion-item>
-      <ion-item>
+      <ion-item *ngIf="transacoes.length>1">
           <ion-icon item-start style="width:20px"></ion-icon>
-          <button color="light" ion-button icon-only  item-start (click)="changeSortByDate()">
+          <button color="light" ion-button item-start (click)="changeSortByDate()">
               <ion-icon name="{{ sortByDate==1 ? 'arrow-dropup' : 'arrow-dropdown'}}"></ion-icon>
+               &nbsp;data
           </button>
-          <button color="light" ion-button icon-only  item-end (click)="changeSortByPag()">
+          <button color="light" ion-button item-end (click)="changeSortByPag()">
+              pagamento&nbsp;
               <ion-icon name="{{ sortByPag==1 ? 'arrow-dropdown' : 'arrow-dropup'}}"></ion-icon>
           </button>
           <ion-icon item-end style="width:20px"></ion-icon>
@@ -59,7 +61,7 @@
             </button>
           </ion-item>
       </ion-list>
-      <ion-card>
+      <ion-card color="light">
           <ion-card-header>
             <h5>Balanço no período</h5>
           </ion-card-header>

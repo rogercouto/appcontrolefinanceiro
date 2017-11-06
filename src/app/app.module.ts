@@ -8,10 +8,12 @@ import { IonicStorageModule } from '@ionic/storage';
 import { LocalNotifications } from '@ionic-native/local-notifications';
 
 import { MyApp } from './app.component';
-import { HomePage, ContaPage, TransacoesPage, DebitoPage, CreditoPage, ConfigPage } from '../pages';
+import { HomePage, ContaPage, TransacoesPage, DebitoPage,
+   CreditoPage, NotasPage, NotaPage, ConfigPage } from '../pages';
 import { ContaProvider } from '../providers';
 import { TransacaoProvider } from '../providers/transacao/transacao';
 import { ConfigProvider } from '../providers/config/config';
+import { NotaProvider } from '../providers/nota/nota';
 
 
 @NgModule({
@@ -22,6 +24,8 @@ import { ConfigProvider } from '../providers/config/config';
     TransacoesPage,
     DebitoPage,
     CreditoPage,
+    NotasPage,
+    NotaPage,
     ConfigPage
   ],
   imports: [
@@ -41,6 +45,8 @@ import { ConfigProvider } from '../providers/config/config';
     TransacoesPage,
     DebitoPage,
     CreditoPage,
+    NotasPage,
+    NotaPage,
     ConfigPage
   ],
   providers: [
@@ -51,6 +57,7 @@ import { ConfigProvider } from '../providers/config/config';
     ContaProvider,
     TransacaoProvider,
     ConfigProvider,
+    NotaProvider
   ]
 })
 export class AppModule {}
