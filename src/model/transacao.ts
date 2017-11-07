@@ -6,8 +6,9 @@ export class Transacao{
         public valor?: number,
         public dataHoraVencimento?: Date,
         public debitoAutomatico?: boolean,
-        public numParcela?: number,
-        public dataHoraPagamento?: Date
+        public dataHoraPagamento?: Date,
+        public parcelamentoId?: number,
+        public numParcela?: number        
     ){}
 
 }

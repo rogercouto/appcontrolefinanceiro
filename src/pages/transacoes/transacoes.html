@@ -51,7 +51,7 @@
           <!-- 'trending-down' : 'trending-up' border-radius: 50%; background-color: #DDD; -->
           <ion-item *ngFor="let transacao of transacoes">
             <ion-icon name="{{ (transacao.valor < 0 ? 'remove-circle' : 'add-circle')}}"
-              color="{{ (transacao.valor < 0 ? 'danger' : 'secondary')}}" style="font-size: 23px;"></ion-icon>
+              color="{{ (transacao.valor < 0 ? 'danger' : 'secondary')}}" style="font-size: 15px;"></ion-icon>
             &nbsp;
             {{transacao.dataHoraVencimento | date: 'dd/MM'}} - R$:&nbsp;
             <span *ngIf="transacao.valor<0" style="color: red">

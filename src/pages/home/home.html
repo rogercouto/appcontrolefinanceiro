@@ -3,12 +3,11 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Início</ion-title>
+    <ion-title>Contas</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <h3>Resumo das contas</h3>
   <ion-card *ngFor="let conta of contas">
     <ion-card-header>
         <ion-item>
@@ -30,6 +29,9 @@
         Saldo disponível: R$: {{(conta.saldo+conta.limite).toFixed(2).toString().replace('.',',')}}
       </p> 
       <p>
+        <button *ngIf="contas.length>1" ion-button icon-only (click)="transfereValor(conta)" color="light">
+            <ion-icon name="arrow-round-forward"></ion-icon>
+        </button>
         <button ion-button icon-only (click)="editaConta(conta)" color="light">
             <ion-icon name="create"></ion-icon>
         </button>

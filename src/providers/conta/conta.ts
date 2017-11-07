@@ -76,7 +76,6 @@ export class ContaProvider {
         localStorage.removeItem[key];
       }
     }
-
   }
 
 }

@@ -229,28 +229,4 @@ export class TransacaoProvider {
     }
   }
 
-  atualizaNotificacoesOld(){
-    this.localNotifications.cancelAll(); //Cancela todas as notificações
-    for (let i = 0; i < localStorage.length; i++){
-      const key = localStorage.key(i);
-      if (key.substring(0,2) == 't_'){
-        const data = localStorage[key];
-        if (data){
-          let transacoes = JSON.parse(data) as Array<Transacao>;  
-          for (let transacao of transacoes) {
-            if (this.ignoraNotificacao(transacao) || this.passouPrazo(transacao))
-              continue;
-            if (this.configProvider.isNotificacoesAtivas()){
-              this.registraNotificacao(transacao);
-            }
-            if (this.configProvider.isNotificaCalendario()){
-              //console.log('Criar notificação no calendário!');
-            }
-          }
-        }
-      }
-      
-    }
-  }
-  
 }

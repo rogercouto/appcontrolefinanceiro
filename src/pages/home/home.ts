@@ -4,7 +4,7 @@ import { AlertController } from 'ionic-angular';
 
 import { ContaProvider, ConfigProvider } from '../../providers';
 import { Conta } from '../../model';
-import { ContaPage } from '../../pages';
+import { ContaPage, TransferenciaPage } from '../../pages';
 
 @Component({
   selector: 'page-home',
@@ -45,6 +45,10 @@ export class HomePage {
 
   editaConta(conta: Conta){
     this.navCtrl.push(ContaPage, {contaParam: conta});
+  }
+
+  transfereValor(conta: Conta){
+    this.navCtrl.push(TransferenciaPage, {contaParam: conta});
   }
 
   excluiConta(conta: Conta){

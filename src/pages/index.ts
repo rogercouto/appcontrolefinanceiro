@@ -6,3 +6,6 @@ export * from './credito/credito';
 export * from './config/config';
 export * from './notas/notas';
 export * from './nota/nota';
+export * from './transferencia/transferencia';
+export * from './parcelamentos/parcelamentos';
+export * from './parcelamento/parcelamento';
