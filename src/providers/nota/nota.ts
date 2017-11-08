@@ -4,47 +4,64 @@ import 'rxjs/add/operator/map';
 
 import { Nota } from '../../model';
 
-/*
-  Generated class for the NotaProvider provider.
+export enum Visibilidade {
+  ativas,
+  arquivadas
+}
 
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
 @Injectable()
 export class NotaProvider {
 
   constructor(public http: Http) {
   }
 
-  getNotas(vis?: number): Array<Nota>{
+  /**
+   * @param visibilidade:
+   * 1: Ativas
+   * 2: Inativas
+   * 3: Todas
+   */
+  private getArray(visibilidade?: Visibilidade):Array<Nota>{
+    const notas = new Array<Nota>();
     const data = localStorage['notas'];
-    if (data && vis != null && vis < 3){
-      const tmpNotas = JSON.parse(data);
-      const notas: Array<Nota> = [];
-      if (vis == 1){
-        for (let nota of tmpNotas){
-            if (!nota.arquivada)
-              notas.push(nota);
-        }  
-      }else if (vis == 2){
-        for (let nota of tmpNotas){
-          if (nota.arquivada)
-            notas.push(nota);
-        }
+    if (data){
+      const array = JSON.parse(data);
+      for (let object of array){
+        if (visibilidade == Visibilidade.ativas && Boolean(object.arquivada))
+          continue;
+        else if (visibilidade == Visibilidade.arquivadas && !Boolean(object.arquivada))  
+          continue;
+        const nota = new Nota();
+        nota.id = Number(object.id);
+        nota.titulo = object.titulo;
+        nota.texto = object.texto;
+        nota.arquivada = Boolean(object.arquivada);
+        notas.push(nota);
       }
-      return notas;
     }
-    return data? JSON.parse(data) as Array<Nota> : [];
+    return notas;
+  }
+
+  getAtivas():Array<Nota>{
+    return this.getArray(Visibilidade.ativas);
+  }
+
+  getArquivadas():Array<Nota>{
+    return this.getArray(Visibilidade.arquivadas);
+  }
+  
+  getAll():Array<Nota>{
+    return this.getArray();
   }
 
   insertNota(nota: Nota){
     nota.id = new Date().getTime();
-    const notas = this.getNotas();
+    const notas = this.getAll();
     notas.push(nota);
     localStorage['notas'] = JSON.stringify(notas);
   }
 
-  private getNotaIndex(notaId: number, notas: Array<Nota>){
+  private findIndex(notaId: number, notas: Array<Nota>){
     for (let i = 0; i < notas.length; i++){
       if (notas[i].id == notaId)
         return i;
@@ -53,15 +70,15 @@ export class NotaProvider {
   }
 
   updateNota(nota: Nota){
-    const notas = this.getNotas();
-    const index = this.getNotaIndex(nota.id, notas);
+    const notas = this.getAll();
+    const index = this.findIndex(nota.id, notas);
     notas[index] = nota;
     localStorage['notas'] = JSON.stringify(notas);
   }
 
   delete(nota: Nota){
-    const notas = this.getNotas();
-    const index = this.getNotaIndex(nota.id, notas);
+    const notas = this.getAll();
+    const index = this.findIndex(nota.id, notas);
     notas.splice(index, 1);
     localStorage['notas'] = JSON.stringify(notas);
   }

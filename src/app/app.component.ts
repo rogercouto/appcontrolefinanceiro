@@ -5,7 +5,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { LocalNotifications } from '@ionic-native/local-notifications';
 import { AlertController } from 'ionic-angular';
 
-import { HomePage, TransacoesPage, NotasPage, ConfigPage } from '../pages';
+import { HomePage, TransacoesPage, NotasPage, ParcelamentosPage, ConfigPage } from '../pages';
 import { Conta } from '../model';
 import { ContaProvider, TransacaoProvider, ConfigProvider } from '../providers';
 
@@ -27,17 +27,17 @@ export class MyApp {
     public splashScreen: SplashScreen, 
     private contaProvider: ContaProvider,
     private transacaoProvider: TransacaoProvider,
-    private configProvider: ConfigProvider,
+    private configProvider: ConfigProvider,    
     private localNotifications: LocalNotifications,
     private alertCtrl: AlertController) 
     {
-      //console.log(new Date());
       this.giveAlert();
       this.initializeApp();
       this.pages = [
         { title: 'Contas', component: HomePage },      
         { title: 'Transações', component: TransacoesPage },
         { title: 'Notas', component: NotasPage},
+        { title: 'Parcelamentos', component: ParcelamentosPage},
         { title: 'Definições', component: ConfigPage}
       ];
       const index = this.configProvider.getPaginaSel();//pagina acessada por útlimo
@@ -66,7 +66,7 @@ export class MyApp {
   }
 
   initializeApp() {
-    this.contas = this.contaProvider.getContas();
+    this.contas = this.contaProvider.getAll();
     const contaId = this.configProvider.getIdContaSel();
     this.conta = this.configProvider.getContaById(contaId, this.contas);
     this.platform.ready().then(() => {
@@ -117,7 +117,7 @@ export class MyApp {
   }
 
   menuOpened(){
-    this.contas = this.contaProvider.getContas();
+    this.contas = this.contaProvider.getAll();
     const contaId = this.configProvider.getIdContaSel();
     this.conta = this.configProvider.getContaById(contaId, this.contas);
   }

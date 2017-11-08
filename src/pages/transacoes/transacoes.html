@@ -64,7 +64,7 @@
             {{ (transacao.valor < 0 ? '('+(transacao.valor*-1).toFixed(2).toString().replace('.',',')+')' : transacao.valor.toFixed(2).toString().replace('.',','))}}<br/>
             -->
             <br/>
-            <ion-icon *ngIf="transacao.dataHoraPagamento != null" name="checkmark"  color="primary" item-end></ion-icon>  
+            <ion-icon *ngIf="transacao.foiPaga()" name="checkmark"  color="primary" item-end></ion-icon>  
             <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{transacao.descricao}}</p>
             <button color="light" ion-button icon-only  item-end (click)="selecionaTransacao(transacao)">
               <ion-icon name="create"></ion-icon>

@@ -3,13 +3,7 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 
 import { TransacoesPage } from '../../pages';
 import { Transacao, Conta } from '../../model';
-import { TransacaoProvider } from '../../providers';
-/**
- * Generated class for the CreditoPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { TransacaoProvider, ContaProvider } from '../../providers';
 
 @IonicPage()
 @Component({
@@ -19,19 +13,24 @@ import { TransacaoProvider } from '../../providers';
 export class CreditoPage {
 
   public valid: boolean = false;
-  public conta: Conta;
   public transacao: Transacao;
   public dataVenc: string;
+  public valor: string;
 
   public colors: Array<string> = ["dark","dark","dark"];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams,private transacaoProvider: TransacaoProvider) {
-    this.conta = navParams.get("contaParam");
+  constructor(public navCtrl: NavController, 
+    public navParams: NavParams,
+    private transacaoProvider: TransacaoProvider,
+    private contaProvider: ContaProvider
+  ) {
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
       this.dataVenc = this.transacao.dataHoraVencimento.toISOString().substring(0,10);
+      this.valor = this.transacao.valor.toString();
     }else {
       this.transacao = new Transacao();
+      this.transacao.contaId = navParams.get("contaIdParam");;
     }
   }
 
@@ -45,7 +44,7 @@ export class CreditoPage {
   }
 
   checkValor(): void{
-    if (this.transacao.valor != undefined && this.transacao.valor > 0){
+    if (this.valor != undefined && Number(this.valor) > 0){
       this.colors[1] = "secondary";
     }else{
       this.colors[1] = "danger";
@@ -64,7 +63,7 @@ export class CreditoPage {
 
   checkForm(): void{
     if (this.transacao.descricao == undefined
-      || this.transacao.valor == undefined
+      || this.valor == undefined
       || this.dataVenc == undefined)
     {
         this.valid = false;
@@ -75,11 +74,12 @@ export class CreditoPage {
 
   salvaCredito(){
     this.transacao.dataHoraVencimento = new Date(this.dataVenc+' 00:00:00');
+    this.transacao.valor = Number(this.valor);
     if (this.transacao.id == null)
-      this.transacaoProvider.insertTransacao(this.conta, this.transacao);
+      this.transacaoProvider.insert(this.transacao);
     else
-      this.transacaoProvider.updateTransacao(this.conta, this.transacao);
-    this.navCtrl.setRoot(TransacoesPage, { contaParam : this.conta});
+      this.transacaoProvider.update(this.transacao);
+    this.navCtrl.setRoot(TransacoesPage);
   }
 
   ionViewDidLoad() {

@@ -1,18 +1,25 @@
-<!--
-  Generated template for the ParcelamentosPage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
-
-  <ion-navbar>
-    <ion-title>parcelamentos</ion-title>
-  </ion-navbar>
-
-</ion-header>
-
-
-<ion-content padding>
-
-</ion-content>
+    <ion-navbar>
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <ion-title>Parcelamentos</ion-title>
+    </ion-navbar>
+  </ion-header>
+  
+  <ion-content padding>
+      <button ion-button (click)="novoParcelamento()" color="secondary">
+          <ion-icon name="add"></ion-icon>
+          <ion-label>&nbsp;Novo parcelamento</ion-label>
+      </button>
+      <br/><br/>
+      <ion-item>
+        <ion-label>Período:</ion-label>
+        <ion-datetime  displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
+      </ion-item>
+      <ion-list>
+        <button color="light" ion-item *ngFor="let parcelamento of parcelamentos" (click)="editaParcelamento(parcelamento)">
+          {{ parcelamento.descricao }}
+        </button>  
+      </ion-list>
+  </ion-content>

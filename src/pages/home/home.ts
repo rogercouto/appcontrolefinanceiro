@@ -14,19 +14,19 @@ export class HomePage {
 
   private contas: Array<Conta>;
   private contaSel: Conta = null;
-
+  
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
     private contaProvider : ContaProvider,
     private configProvider: ConfigProvider,
     private alertCtrl: AlertController ) 
     {      
-      this.contas = this.contaProvider.getContas();
+      this.contas = this.contaProvider.getAll();
       const contaId = this.configProvider.getIdContaSel();
       this.contaSel = this.configProvider.getContaById(contaId, this.contas);
     }
 
-  isSel(conta : Conta) : boolean{
+   isSel(conta : Conta) : boolean{
     if (conta == null || this.contaSel == null)
       return false;
     if (conta.id == this.contaSel.id)
@@ -59,8 +59,8 @@ export class HomePage {
        {
          text: "Sim",
          handler: data => {
-          this.contaProvider.deleteConta(conta);
-          this.contas = this.contaProvider.getContas();
+          this.contaProvider.delete(conta);
+          this.contas = this.contaProvider.getAll();
          }
        },
        {

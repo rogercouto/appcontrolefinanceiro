@@ -4,69 +4,68 @@ import 'rxjs/add/operator/map';
 
 import { Conta } from '../../model';
 
-/*
-  Generated class for the ContaProvider provider.
-
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
 @Injectable()
 export class ContaProvider {
 
   constructor(public http: Http) {}
-
-  getConta(id: number): Conta{
-    const contas = this.getContas();
+  
+  getAll():Array<Conta>{
+    const contas = new Array<Conta>();
+    const data = localStorage['contas'];
+    if (data){
+      const array = JSON.parse(data);
+      for (let object of array){
+        const conta = new Conta();
+        conta.id = object.id;
+        conta.descricao = object.descricao;
+        conta.saldo = object.saldo;
+        conta.limite = object.limite;
+        contas.push(conta);
+      }
+    }
+    return contas;
+  }
+  
+  get(id: number): Conta{
+    const contas = this.getAll();
     for (let conta of contas){
       if (id == conta.id)
         return conta;
     }
     return null;
   }
-  
 
-  getContas() : Array<Conta>{
-    const data = localStorage['contas'];
-    if (data){
-      let contas = JSON.parse(data) as Array<Conta>;  
-      return contas;
-    }else{
-      return [];
-    }
-  }
-
-  insertConta(conta: Conta){
-    const contas = this.getContas();
+  insert(conta: Conta){
+    const contas = this.getAll();
     conta.id = new Date().getTime();
     contas.push(conta);
     localStorage['contas'] = JSON.stringify(contas);
   }
 
-  private findContaIndex(conta : Conta): number{
-    const contas = this.getContas();
+  private findIndex(conta: Conta, contas: Array<Conta>){
     for (let i = 0; i < contas.length; i++){
-      if (contas[i].id === conta.id)
+      if (contas[i].id == conta.id)
         return i;
     }
     return Number(-1);
   }
 
-  updateConta(conta: Conta){
-    const index = this.findContaIndex(conta);
-    const contas = this.getContas();
+  update(conta: Conta){
+    const contas = this.getAll();
+    const index = this.findIndex(conta, contas);
     contas[index] = conta;
     localStorage['contas'] = JSON.stringify(contas);
   }
 
-  deleteConta(conta: Conta){
+  delete(conta: Conta){
     const data = localStorage['contaSel'];
     if (data){
       const contaSel = JSON.parse(data);
       if (contaSel.id == conta.id)
         localStorage.removeItem('contaSel');
     }
-    const index = this.findContaIndex(conta);
-    const contas = this.getContas();
+    const contas = this.getAll();
+    const index = this.findIndex(conta, contas);
     contas.splice(index ,1);
     localStorage['contas'] = JSON.stringify(contas);
     //deletar transações da conta

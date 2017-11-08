@@ -7,4 +7,18 @@ export class Conta{
         public limite?: number
     ){}
 
+    addValor(valor: number){
+        let novoSaldo = this.saldo + valor;
+        this.saldo = Number(novoSaldo);
+    }
+
+    subValor(valor: number){
+        let novoSaldo = this.saldo - valor;
+        this.saldo = Number(novoSaldo);
+    }
+
+    getSaldoDisponivel(){
+        return Number(this.saldo+this.limite);
+    }
+
 }

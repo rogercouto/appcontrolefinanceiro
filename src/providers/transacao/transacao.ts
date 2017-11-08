@@ -9,12 +9,6 @@ import { ContaProvider } from '../';
 import { ConfigProvider } from '../config/config';//gambiarra pra solucionar bug
 import { Conta, Transacao} from '../../model';
 
-/*
-  Generated class for the TransacaoProvider provider.
-
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
 @Injectable()
 export class TransacaoProvider {
 
@@ -25,56 +19,80 @@ export class TransacaoProvider {
     private alertCtrl: AlertController)
   {}
 
-  getTransacoes(conta: Conta, periodo: string): Array<Transacao>{
+  private precisaPagar(transacao: Transacao){
+    if (transacao.dataHoraPagamento != null || !transacao.debitoAutomatico)
+      return false;
+    let venc = transacao.dataHoraVencimento;
+    venc.setHours(0);
+    venc.setMinutes(0);
+    venc.setSeconds(0);
+    venc.setMilliseconds(0);
+    let hoje = new Date();
+    hoje.setHours(0);
+    hoje.setMinutes(0);
+    hoje.setSeconds(0);
+    hoje.setMilliseconds(0);
+    if (hoje >= venc)
+      return true;
+    return false;    
+  }
+
+  getArray(contaId: number, periodo: string): Array<Transacao>{
+    const transacoes = new Array<Transacao>();
+    const conta = this.contaProvider.get(contaId);
     const key = 't_'+conta.id+'_'+periodo;
     const data = localStorage[key];
     if (data){
-      let transacoes = JSON.parse(data) as Array<Transacao>;  
+      const array = JSON.parse(data);
       let update = false;
-      for (let transacao of transacoes) {
-          transacao.valor = Number(transacao.valor); //gambi
-          transacao.dataHoraVencimento = new Date(transacao.dataHoraVencimento); //gambi 2
-          if (transacao.dataHoraPagamento == null && transacao.debitoAutomatico){
-            let venc = new Date(transacao.dataHoraVencimento);
-            venc.setHours(0);
-            venc.setMinutes(0);
-            venc.setSeconds(0);
-            venc.setMilliseconds(0);
-            let hoje = new Date();
-            hoje.setHours(0);
-            hoje.setMinutes(0);
-            hoje.setSeconds(0);
-            hoje.setMilliseconds(0);
-            if (hoje >= venc){
-                transacao.dataHoraPagamento = new Date();
-                conta.saldo = Number(conta.saldo + transacao.valor);
-                update = true;
-            }
-          }
+      for (let object of array){
+        const transacao = new Transacao();
+        transacao.id = Number(object.id);
+        transacao.descricao = object.descricao;
+        transacao.contaId = Number(object.contaId);
+        transacao.valor = Number(object.valor);
+        transacao.dataHoraVencimento = new Date(object.dataHoraVencimento);
+        transacao.debitoAutomatico = object.debitoAutomatico;
+        if (object.dataHoraPagamento != null)
+          transacao.dataHoraPagamento = new Date(object.dataHoraPagamento);
+        transacao.parcelamentoId = Number(object.parcelamentoId);
+        transacao.numParcela = Number(object.numParcela);
+        transacoes.push(transacao);
+        if (this.precisaPagar(transacao)){
+          transacao.dataHoraPagamento = new Date();
+          conta.saldo = Number(conta.saldo + transacao.valor);
+          update = true;
+        }
       }
       if (update){
-        localStorage[key] = JSON.stringify(transacoes);
-        this.contaProvider.updateConta(conta);
+        localStorage[key] = JSON.stringify(transacoes);//atualiza as transações
+        this.contaProvider.update(conta);
       }
-      return transacoes;
     }
-    return [];
+    return transacoes;
   }
 
-  insertTransacao(conta: Conta, transacao: Transacao){
+  insert(transacao: Transacao){
     const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
-    const key = 't_'+conta.id+'_'+periodo;
-    const transacoes : Array<Transacao> = this.getTransacoes(conta, periodo);
-    transacao.dataHoraVencimento = new Date(transacao.dataHoraVencimento);//gambi
+    const key = 't_'+transacao.contaId+'_'+periodo;
+    const transacoes = this.getArray(transacao.contaId, periodo);
     transacao.id = new Date().getTime();
+    if (this.precisaPagar(transacao)){
+      transacao.dataHoraPagamento = new Date();
+      const conta = this.contaProvider.get(transacao.contaId);
+      conta.addValor(transacao.valor);
+      this.contaProvider.update(conta);
+    }else if (transacao.foiPaga()){
+      const conta = this.contaProvider.get(transacao.contaId);
+      conta.addValor(transacao.valor);
+      this.contaProvider.update(conta);
+    }
     transacoes.push(transacao);
     localStorage[key] = JSON.stringify(transacoes);
     this.atualizaNotificacoes();
   }
 
-  private findTransacaoIndex(conta: Conta, transacao : Transacao): number{
-    const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
-    const transacoes = this.getTransacoes(conta, periodo);
+  private findIndex(transacao: Transacao, transacoes: Array<Transacao>){
     for (let i = 0; i < transacoes.length; i++){
       if (transacoes[i].id === transacao.id)
         return i;
@@ -82,40 +100,38 @@ export class TransacaoProvider {
     return Number(-1);
   }
 
-  updateTransacao(conta: Conta, transacao: Transacao){
-    const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
-    const transacoes = this.getTransacoes(conta, periodo);
-    const index = this.findTransacaoIndex(conta, transacao);
+  update(transacao: Transacao){
+    const transacoes = this.getArray(transacao.contaId, transacao.getPeriodo());
+    const index = this.findIndex(transacao, transacoes);
+    const conta = this.contaProvider.get(transacao.contaId);
     let updateConta = false;
-    if (transacoes[index].dataHoraPagamento == null && transacao.dataHoraPagamento != null){
-      //pagamento
-      conta.saldo = Number(conta.saldo+transacao.valor);  
+    if (!transacoes[index].foiPaga() && transacao.foiPaga()){
+      conta.addValor(transacao.valor);
       updateConta = true;
-    }else if (transacoes[index].dataHoraPagamento != null && transacao.dataHoraPagamento == null){
-      //cancelamento de pagamento
-      conta.saldo = Number(conta.saldo-transacao.valor);  
+    }else if (transacoes[index].foiPaga() && !transacao.foiPaga()){
+      conta.subValor(transacao.valor);
       updateConta = true;
     }
     transacoes[index] = transacao;
-    const key = 't_'+conta.id+'_'+periodo;
+    const key = 't_'+transacao.contaId+'_'+transacao.getPeriodo();
+    console.log(transacoes);
     localStorage[key] = JSON.stringify(transacoes);
     if (updateConta){
-      this.contaProvider.updateConta(conta);
+      this.contaProvider.update(conta);
     }
     this.atualizaNotificacoes();
   }
 
-  deleteTransacao(conta: Conta, transacao: Transacao){
-    if (transacao.dataHoraPagamento != null){
-      conta.saldo = Number(conta.saldo-transacao.valor);
-      //atualiza o saldo da conta caso já tenha sido paga
-      this.contaProvider.updateConta(conta);
+  delete(transacao: Transacao){
+    const conta = this.contaProvider.get(transacao.contaId);
+    if (transacao.foiPaga()){
+      conta.subValor(transacao.valor);
+      this.contaProvider.update(conta);
     }
-    const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
-    const transacoes = this.getTransacoes(conta, periodo);
-    const index = this.findTransacaoIndex(conta, transacao);
-    transacoes.splice(index ,1);
-    const key = 't_'+conta.id+'_'+periodo;
+    const transacoes = this.getArray(transacao.contaId, transacao.getPeriodo());
+    const index = this.findIndex(transacao, transacoes);
+    transacoes.splice(index, 1);
+    const key = 't_'+transacao.contaId+'_'+transacao.getPeriodo();
     localStorage[key] = JSON.stringify(transacoes);
     this.atualizaNotificacoes();
   }
@@ -167,11 +183,11 @@ export class TransacaoProvider {
     });
   }
 
-  daysInMonth(month: number, year: number):number{
+  private daysInMonth(month: number, year: number):number{
       return 32 - new Date(year, month-1, 32).getDate();
   }
 
-  daysInPeriodo(key: string):number{
+  private daysInPeriodo(key: string):number{
     const month = Number(key.substring(21, 23));
     const year = Number(key.substring(16, 20));
     return this.daysInMonth(month, year);

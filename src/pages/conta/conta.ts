@@ -53,9 +53,9 @@ export class ContaPage {
     else
       this.conta.limite = Number(this.conta.limite);  
     if (this.conta.id == null)
-      this.contaProvider.insertConta(this.conta);
+      this.contaProvider.insert(this.conta);
     else
-      this.contaProvider.updateConta(this.conta);
+      this.contaProvider.update(this.conta);
     this.navCtrl.setRoot(HomePage);
   }
 

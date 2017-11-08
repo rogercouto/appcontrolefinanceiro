@@ -4,12 +4,6 @@ import 'rxjs/add/operator/map';
 
 import { Conta } from '../../model';
 
-/*
-  Generated class for the ConfigProvider provider.
-
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
 @Injectable()
 export class ConfigProvider {
 
@@ -22,7 +16,7 @@ export class ConfigProvider {
 
   getIdContaSel() : number{
     const data = localStorage['contaSel'];
-    return data ? JSON.parse(data) : null;
+    return data ? Number(JSON.parse(data)) : null;
   }
 
   getContaById(id: number, contas: Array<Conta>) : Conta{
@@ -32,7 +26,6 @@ export class ConfigProvider {
     }
     return null;
   }
-
 
   selecionaPagina(index : number){
     localStorage['paginaSel'] = JSON.stringify(index);
@@ -59,7 +52,7 @@ export class ConfigProvider {
 
   isNotificacoesAtivas(): boolean{
     const data = localStorage['notificacoesAtivas'];
-    return data ? JSON.parse(data) : false;
+    return data ? Boolean(JSON.parse(data)) : false;
   }
 
   setNotificacaoCalendario(usaCalendario: boolean){
@@ -68,7 +61,7 @@ export class ConfigProvider {
 
   isNotificaCalendario(): boolean{
     const data = localStorage['usaCalendario'];
-    return data ? JSON.parse(data) : false;
+    return data ? Boolean(JSON.parse(data)) : false;
   }
 
 }

@@ -19,9 +19,10 @@ import { TransacaoProvider } from '../../providers';
 export class DebitoPage {
 
   public valid: boolean = false;
-  public conta: Conta;
+  
   public transacao: Transacao;
   public dataVenc: string;
+  public valor: string;
 
   public colors: Array<string> = ["dark","dark","dark"];
 
@@ -29,14 +30,15 @@ export class DebitoPage {
     public navParams: NavParams,
     private transacaoProvider: TransacaoProvider
   ) {
-    this.conta = navParams.get("contaParam");
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
       this.dataVenc = this.transacao.dataHoraVencimento.toISOString().substring(0,10);
       if (this.transacao.valor < 0)
-        this.transacao.valor *= -1;
+      this.transacao.valor *= -1;
+      this.valor = (this.transacao.valor *= -1).toString();
     }else{
       this.transacao = new Transacao();
+      this.transacao.contaId = navParams.get("contaIdParam");
     } 
   }
 
@@ -50,7 +52,7 @@ export class DebitoPage {
   }
 
   checkValor(): void{
-    if (this.transacao.valor != undefined && this.transacao.valor != 0){
+    if (Number(this.valor) != undefined && Number(this.valor) != 0){
       this.colors[1] = "secondary";
     }else{
       this.colors[1] = "danger";
@@ -69,7 +71,7 @@ export class DebitoPage {
 
   checkForm(): void{
     if (this.transacao.descricao == undefined
-      || this.transacao.valor == undefined
+      || this.valor == undefined
       || this.dataVenc == undefined)
     {
         this.valid = false;
@@ -82,12 +84,14 @@ export class DebitoPage {
     if (this.transacao.valor > 0)
       this.transacao.valor *= -1;
     this.transacao.dataHoraVencimento = new Date(this.dataVenc+' 00:00:00');
+    this.transacao.valor = Number(this.valor);
+    if (this.transacao.valor >= 0)
+      this.transacao.valor = Number(this.transacao.valor*-1);
     if (this.transacao.id == null)
-      this.transacaoProvider.insertTransacao(this.conta, this.transacao);
+      this.transacaoProvider.insert(this.transacao);
     else
-      this.transacaoProvider.updateTransacao(this.conta, this.transacao);
-      //tirei notificação daqui
-    this.navCtrl.setRoot(TransacoesPage, { contaParam : this.conta});
+      this.transacaoProvider.update(this.transacao);
+    this.navCtrl.setRoot(TransacoesPage);
   }
 
   ionViewDidLoad() {

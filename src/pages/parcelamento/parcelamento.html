@@ -1,18 +1,61 @@
-<!--
-  Generated template for the ParcelamentoPage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
-
-  <ion-navbar>
-    <ion-title>parcelamento</ion-title>
-  </ion-navbar>
-
+    <ion-navbar>
+      <ion-title>{{parcelamento.id==null?'Novo parcelamento':'Editar parcelamento'}}</ion-title>
+    </ion-navbar>
 </ion-header>
-
-
 <ion-content padding>
-
+    <ion-item>
+        <ion-label floating [color]="colors[0]">Descrição</ion-label>
+        <ion-input type="text" name="descricao" [(ngModel)]="parcelamento.descricao" (ionChange)="checkDescr()"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label color="dark">Tipo:</ion-label>
+        <ion-select style="max-width: 100%" interface="popover" [(ngModel)]="tipo">
+          <ion-option color="danger" value="debito">Débito</ion-option>
+          <ion-option value="credito">Crédito</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label floating [color]="colors[1]">Data inicial</ion-label>
+        <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY"
+          [(ngModel)]="dataIni" (ionChange)="checkData()"></ion-datetime>
+    </ion-item>
+    <ion-item>
+        <ion-label color="dark">Informado:</ion-label>
+        <ion-select style="max-width: 100%" interface="popover" [(ngModel)]="tipoValor" (ionChange)="checkForm()">
+            <ion-option value="total">Valor total</ion-option>
+            <ion-option value="parcela">Valor parcela</ion-option>
+        </ion-select>
+    </ion-item>
+    <!--
+    <ion-list no-lines radio-group [(ngModel)]="tipoValor" style="white-space: nowrap;overflow: visible;">
+      <ion-item>
+        <ion-label>Valor total</ion-label>
+        <ion-radio value="total" (click)="checkForm()"></ion-radio>
+      </ion-item>
+      <ion-item>  
+        <ion-label>Valor parcela</ion-label>
+        <ion-radio value="parcela" (click)="checkForm()"></ion-radio>
+      </ion-item>
+    </ion-list>
+-->
+    <ion-item>
+        <ion-label [color]="colors[2]">Valor:</ion-label>
+        <ion-input type="number" max="10" [(ngModel)]="valor" (ionChange)="checkValor()"></ion-input>
+    </ion-item>
+    <ion-item>
+        <p style="color:black;width:100%;text-align: end">{{(tipoValor==='total'?'Valor parcela':'Valor total')}}: R$ {{valorCalculado}}</p>
+    </ion-item>
+    <ion-item>
+        <ion-label [color]="colors[3]">Número de parcelas:</ion-label>
+        <ion-input type="number" max="10" name="valor" [(ngModel)]="parcelamento.numParcelas" (ionChange)="checkParcelas()"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label>Com entrada</ion-label>
+        <ion-checkbox [(ngModel)]="parcelamento.entrada"></ion-checkbox>
+      </ion-item>
+    <br/>
+    <button [disabled]="!valid" ion-button block (click)="salvaParcelamento()">Salvar</button>
+    <br/>
+    <button *ngIf="parcelamento.id!=null" color="danger" ion-button block (click)="excluiParcelamento()">Excluir</button>
 </ion-content>

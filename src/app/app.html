@@ -6,15 +6,13 @@
   </ion-header>
   <ion-content>
     <ion-list>
-        <ion-item>
-          <ion-label>Conta:</ion-label>
-          <ion-select interface="popover" [(ngModel)]="conta" [compareWith]="comparaConta" (ionChange)="trocaConta(conta)">
-            <ion-option *ngFor="let conta of contas" [value]="conta">{{conta.descricao}}</ion-option>
-          </ion-select>
-        </ion-item>
-      </ion-list>
-    <ion-list>
-      <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
+      <ion-item color="light">
+        <ion-label>Conta:</ion-label>
+        <ion-select style="max-width: 100%" interface="popover" [(ngModel)]="conta" [compareWith]="comparaConta" (ionChange)="trocaConta(conta)">
+          <ion-option *ngFor="let conta of contas" [value]="conta">{{conta.descricao}}</ion-option>
+        </ion-select>
+      </ion-item>
+      <button color="light" menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
         {{p.title}}
       </button>
     </ion-list>

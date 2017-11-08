@@ -20,21 +20,27 @@ import { NotaPage } from '../../pages';
 export class NotasPage {
 
   private notas: Array<Nota> = [];
-  private vis: number = 1;
+  private vis = 'ativas';
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
     public notaProvider: NotaProvider
   ) {
-    this.notas = this.notaProvider.getNotas(this.vis);
+    this.refresh();
   }
 
   ionViewDidLoad() {
   }
 
   refresh(){
-    this.notas = this.notaProvider.getNotas(this.vis);
+    if (this.vis == 'ativas'){
+      this.notas = this.notaProvider.getAtivas();
+    }else if (this.vis == 'arquivadas'){
+      this.notas = this.notaProvider.getArquivadas();
+    }else{
+      this.notas = this.notaProvider.getAll();
+    }
   }
 
   insere(){

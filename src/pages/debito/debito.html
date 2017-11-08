@@ -19,7 +19,7 @@
     </ion-item>
     <ion-item>
         <ion-label floating [color]="colors[1]">Valor</ion-label>
-        <ion-input type="number" max="10" name="valor" [disabled]="transacao.dataHoraPagamento!=null" [(ngModel)]="transacao.valor" (ionChange)="checkValor()"></ion-input>
+        <ion-input type="number" max="10" name="valor" [disabled]="transacao.dataHoraPagamento!=null" [(ngModel)]="valor" (ionChange)="checkValor()"></ion-input>
     </ion-item>
     <ion-item>
         <ion-label floating [color]="colors[2]">Vencimento</ion-label>

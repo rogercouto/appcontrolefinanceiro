@@ -37,7 +37,7 @@ export class TransferenciaPage {
     private transacaoProvider: TransacaoProvider
   ) {
     this.contaOrigem = navParams.get("contaParam");
-    const tmpContas = this.contaProvider.getContas();
+    const tmpContas = this.contaProvider.getAll();
     for(let conta of tmpContas){
       if (!this.comparaConta(conta, this.contaOrigem))
         this.contas.push(conta);
@@ -98,23 +98,19 @@ export class TransferenciaPage {
   confirma(){
     const now = new Date();
     const tOri = new Transacao();
+    tOri.contaId = this.contaOrigem.id;
     tOri.descricao = this.descricaoOrigem;
     tOri.valor = Number(this.valor * -1);
     tOri.dataHoraVencimento = now;
     tOri.dataHoraPagamento = now;
-    this.transacaoProvider.insertTransacao(this.contaOrigem, tOri);
+    this.transacaoProvider.insert(tOri);
     const tDest = new Transacao();
+    tDest.contaId = this.contaDestino.id;
     tDest.descricao = this.mesmaDescr ? this.descricaoOrigem : this.descricaoDestino;
     tDest.valor = Number(this.valor);
     tDest.dataHoraVencimento = now;
     tDest.dataHoraPagamento = now;
-    this.transacaoProvider.insertTransacao(this.contaDestino, tDest);
-    // se der tempo fazer essa parte na própria TransferenciaProvider
-    this.contaOrigem.saldo = Number(this.contaOrigem.saldo-this.valor);
-    this.contaProvider.updateConta(this.contaOrigem);
-    this.contaDestino.saldo = Number(this.contaDestino.saldo+this.valor);
-    this.contaProvider.updateConta(this.contaDestino);
-    //
+    this.transacaoProvider.insert(tDest);
     this.navCtrl.setRoot(HomePage);
   }
 

@@ -40,7 +40,7 @@ export class TransacoesPage {
     private alertCtrl: AlertController
   ) {
     const contaId = this.configProvider.getIdContaSel();
-    this.conta = this.contaProvider.getConta(contaId);
+    this.conta = this.contaProvider.get(contaId);
   }
 
   ionViewDidLoad() {
@@ -85,7 +85,6 @@ export class TransacoesPage {
     return Number(this.totalCredito + this.totalDebito);
   }
 
-
   changeSortByDate(){
     this.sortByDate *= -1;
     this.refresh();
@@ -97,7 +96,8 @@ export class TransacoesPage {
   }
 
   refresh(){
-    this.transacoes = this.transacaoProvider.getTransacoes(this.conta, this.periodo);
+    this.conta = this.contaProvider.get(this.configProvider.getIdContaSel());
+    this.transacoes = this.transacaoProvider.getArray(this.conta.id, this.periodo);
     const sd = this.sortByDate;
     const sp = this.sortByPag;
     this.transacoes.sort(function(t1:Transacao,t2:Transacao){
@@ -112,13 +112,42 @@ export class TransacoesPage {
   }
 
   debito(){
-    this.navCtrl.push(DebitoPage, {contaParam: this.conta});
+    this.navCtrl.push(DebitoPage, {contaIdParam: this.conta.id});
     this.refresh();
   }
 
   credito(){
-    this.navCtrl.push(CreditoPage, {contaParam: this.conta});
+    this.navCtrl.push(CreditoPage, {contaIdParam: this.conta.id});
     this.refresh();
+  }
+
+  msgSaldoIndisponivel(){
+    let alert = this.alertCtrl.create({
+      title: 'Saldo indisponível',
+      subTitle: 'Não é possivel realizar o pagamento!',
+      buttons: ['Ok']
+    });
+    alert.present();
+  }
+
+  private excluiTransacao(transacao: Transacao){
+    let pronptExclude = this.alertCtrl.create({
+      title: 'Atenção!',
+      message: 'Confirma exclusão da transação?',
+      buttons:[
+        {
+          text: 'Sim',
+          handler: data =>{
+            this.transacaoProvider.delete(transacao);
+            this.refresh();
+          }
+        },
+        {
+          text: 'Não'
+        }
+      ]
+    });
+    pronptExclude.present();
   }
 
   selecionaTransacao(transacao: Transacao): void{
@@ -130,62 +159,40 @@ export class TransacoesPage {
         text: "Editar",
         handler: data => {
           if (transacao.valor < 0)
-            this.navCtrl.push(DebitoPage, {contaParam: this.conta, transacaoParam: transacao});
+            this.navCtrl.push(DebitoPage, {transacaoParam: transacao});
           else 
-            this.navCtrl.push(CreditoPage, {contaParam: this.conta, transacaoParam: transacao}); 
+            this.navCtrl.push(CreditoPage, {transacaoParam: transacao}); 
         }
       },
       {
         text: "Excluir",
         handler: data => {
-          let pronptExclude = this.alertCtrl.create({
-            title: 'Atenção!',
-            message: 'Confirma exclusão da transação?',
-            buttons:[
-              {
-                text: 'Sim',
-                handler: data =>{
-                  this.transacaoProvider.deleteTransacao(this.conta, transacao);
-                  this.refresh();
-                }
-              },
-              {
-                text: 'Não'
-              }
-            ]
-          });
-          pronptExclude.present();
+          this.excluiTransacao(transacao);
         }
       },
       {
-        text: transacao.dataHoraPagamento == null ? "Pagar" : "Cancelar pagamento",
+        text: transacao.foiPaga() ? "Cancelar pagamento" : "Pagar",
         handler: data => {
-          if (transacao.dataHoraPagamento == null){
-            const saldoDisponivel = Number(this.conta.saldo+this.conta.limite);
-            if (transacao.valor < 0 && (saldoDisponivel+transacao.valor < 0)){
-              let alert = this.alertCtrl.create({
-                title: 'Saldo indisponível',
-                subTitle: 'Não é possivel realizar o pagamento!',
-                buttons: ['Ok']
-              });
-              alert.present();
-            }else{
-              transacao.dataHoraPagamento = new Date();
-              this.calculaBalanco();
-            }
-          }else{
+          if (transacao.foiPaga()){
             transacao.dataHoraPagamento = null;
             if (transacao.debitoAutomatico)
               transacao.debitoAutomatico = false;
             this.calculaBalanco();
+          }else{
+            const previsaoSaldo = this.conta.getSaldoDisponivel()+transacao.valor;
+            if (transacao.isDebito() && previsaoSaldo < 0){
+              this.msgSaldoIndisponivel();
+            }else{
+              transacao.dataHoraPagamento = new Date();
+              this.calculaBalanco();
+            }
           }
-          this.transacaoProvider.updateTransacao(this.conta, transacao);
+          this.transacaoProvider.update(transacao);
+          this.refresh();
         }
       },
       {
-        text: "Cancelar",
-        handler: data => {
-        }
+        text: "Cancelar"
       }
      ]
      });
