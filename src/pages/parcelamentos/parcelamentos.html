@@ -19,7 +19,9 @@
       </ion-item>
       <ion-list>
         <button color="light" ion-item *ngFor="let parcelamento of parcelamentos" (click)="editaParcelamento(parcelamento)">
-          {{ parcelamento.descricao }}
+          {{ parcelamento.descricao }}<br/> 
+          Total: {{parcelamento.valorTotal.toFixed(2).replace('.',',') }} - 
+          Parcelas: {{parcelamento.numParcelas}}
         </button>  
       </ion-list>
   </ion-content>

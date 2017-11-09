@@ -25,7 +25,7 @@ export class NotaPage {
     public navCtrl: NavController, 
     public navParams: NavParams,
     public notaProvider: NotaProvider,
-    private alertCtrl: AlertController,
+    private alertCtrl: AlertController
   ) {
     if (this.navParams.get('notaParam') != null)
       this.nota = this.navParams.get('notaParam') as Nota;

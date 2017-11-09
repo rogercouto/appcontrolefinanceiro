@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 
 import { TransacoesPage } from '../../pages';
-import { Transacao, Conta } from '../../model';
+import { Transacao } from '../../model';
 import { TransacaoProvider } from '../../providers';
 /**
  * Generated class for the DebitoPage page.
@@ -33,9 +33,8 @@ export class DebitoPage {
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
       this.dataVenc = this.transacao.dataHoraVencimento.toISOString().substring(0,10);
-      if (this.transacao.valor < 0)
       this.transacao.valor *= -1;
-      this.valor = (this.transacao.valor *= -1).toString();
+      this.valor = Number(this.transacao.valor).toString();
     }else{
       this.transacao = new Transacao();
       this.transacao.contaId = navParams.get("contaIdParam");

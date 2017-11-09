@@ -7,13 +7,17 @@ export class Parcelamento{
         public dataIni?: Date,
         public numParcelas?: number,
         public valorTotal?: number,
-        public entrada?: boolean
+        public entrada?: boolean,
+        public debitoAutomatico?: boolean
     ){
-        this.entrada = false;
     }
 
     getDataIniStr(){
         return this.dataIni.toISOString().substring(0, 10);
+    }
+
+    getPeriodo(){
+        return this.dataIni.toISOString().substring(0, 7);
     }
 
 }

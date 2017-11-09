@@ -5,50 +5,12 @@ import 'rxjs/add/operator/map';
 import { ContaProvider, TransacaoProvider } from '../';
 import { Parcelamento, Conta, Transacao} from '../../model';
 
-/*
-  Generated class for the ParcelamentoProvider provider.
-
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
 @Injectable()
 export class ParcelamentoProvider {
 
   constructor(public http: Http, 
     private contaProvider: ContaProvider, 
     private transacaoProvider: TransacaoProvider) {
-  }
-
-  insert(parcelamento: Parcelamento){
-    const conta = this.contaProvider.get(parcelamento.contaId);
-    const periodo = parcelamento.dataIni.toISOString().substring(0,7);
-    const key = 'p_'+conta.id+'_'+periodo;
-    const parcelamentos = this.getArray(conta, periodo);
-    parcelamentos.push(parcelamento);
-    localStorage[key] = JSON.stringify(parcelamentos);
-    const data = parcelamento.dataIni;
-    const valorParcela = Number(Math.round((parcelamento.valorTotal / parcelamento.numParcelas) * 100) / 100);
-    for (let i = 0; i < parcelamento.numParcelas; i++){
-      const num = i+1;
-      const transacao = new Transacao();
-      transacao.contaId = conta.id;
-      transacao.descricao = parcelamento.descricao+" - "+num+"/"+parcelamento.numParcelas;
-      transacao.dataHoraVencimento = data;
-      if (i == 0 && parcelamento.entrada)
-        transacao.dataHoraPagamento = data;
-      if (i == 0){
-        transacao.valor = Number(parcelamento.valorTotal - ((parcelamento.numParcelas-1)*valorParcela));
-        if (parcelamento.entrada){
-          transacao.dataHoraPagamento = data;
-          conta.saldo = Number(conta.saldo + transacao.valor);
-          this.contaProvider.update(conta);
-        }
-      }else{
-        transacao.valor = valorParcela;
-      } 
-      this.transacaoProvider.insert(transacao);
-      data.setMonth(data.getMonth()+1);
-    }
   }
 
   getArray(conta: Conta, periodo: string):Array<Parcelamento>{
@@ -66,6 +28,7 @@ export class ParcelamentoProvider {
         parcelamento.numParcelas = object.numParcelas;
         parcelamento.valorTotal = Number(object.valorTotal);
         parcelamento.entrada = object.entrada;
+        parcelamento.debitoAutomatico = object.debitoAutomatico;
         result.push(parcelamento);
       }
       return result;
@@ -73,5 +36,118 @@ export class ParcelamentoProvider {
     return new Array<Parcelamento>();
   }
   
+  private insertParcelas(conta: Conta, parcelamento: Parcelamento){
+    const data = parcelamento.dataIni;
+    const valorParcela = Number(Math.round((parcelamento.valorTotal / parcelamento.numParcelas) * 100) / 100);
+    for (let i = 0; i < parcelamento.numParcelas; i++){
+      const num = i+1;
+      const transacao = new Transacao();
+      transacao.parcelamentoId = parcelamento.id;
+      transacao.numParcela = Number(num);
+      transacao.contaId = conta.id;
+      transacao.descricao = parcelamento.descricao+" - "+num+"/"+parcelamento.numParcelas;
+      transacao.dataHoraVencimento = data;
+      transacao.debitoAutomatico =  parcelamento.debitoAutomatico;
+      if (i == 0 && parcelamento.entrada)
+        transacao.dataHoraPagamento = data;
+      if (i == 0){
+        transacao.valor = Number(parcelamento.valorTotal - ((parcelamento.numParcelas-1)*valorParcela));
+        if (parcelamento.entrada){
+          transacao.dataHoraPagamento = data;
+          //conta.saldo = Number(conta.saldo + transacao.valor);
+          this.contaProvider.update(conta);
+        }
+      }else{
+        transacao.valor = valorParcela;
+      } 
+      this.transacaoProvider.insert(transacao);
+      data.setMonth(data.getMonth()+1);
+    }
+  }
+
+  insert(parcelamento: Parcelamento){
+    const conta = this.contaProvider.get(parcelamento.contaId);
+    const periodo = parcelamento.dataIni.toISOString().substring(0,7);
+    const key = 'p_'+conta.id+'_'+periodo;
+    const parcelamentos = this.getArray(conta, periodo);
+    parcelamentos.push(parcelamento);
+    localStorage[key] = JSON.stringify(parcelamentos);
+    this.insertParcelas(conta, parcelamento);   
+  }
+
+  private getTransacao(object: any):Transacao{
+    const transacao = new Transacao();
+    transacao.id = Number(object.id);
+    transacao.descricao = object.descricao;
+    transacao.contaId = Number(object.contaId);
+    transacao.valor = Number(object.valor);
+    transacao.dataHoraVencimento = new Date(object.dataHoraVencimento);
+    transacao.debitoAutomatico = object.debitoAutomatico;
+    if (object.dataHoraPagamento != null)
+      transacao.dataHoraPagamento = new Date(object.dataHoraPagamento);
+    transacao.parcelamentoId = Number(object.parcelamentoId);
+    transacao.numParcela = Number(object.numParcela);
+    return transacao;
+  }
+  /**
+   * Deleta todas as transações de um parcelamento
+   * @param parcelamento
+   */
+  private deleteParcelas(parcelamento: Parcelamento){
+    const conta = this.contaProvider.get(parcelamento.contaId);
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,15) == 't_'+parcelamento.contaId){
+        const data = localStorage[key];
+        const array = JSON.parse(data);
+        const transacoes = new Array<Transacao>();
+        for (let object of array){
+          const transacao = this.getTransacao(object);
+          if (transacao.parcelamentoId != parcelamento.id){
+            transacoes.push(transacao);
+          }else{
+            if (transacao.foiPaga())
+              conta.subValor(transacao.valor);
+          }
+        }
+        if (transacoes.length != array.length){
+          localStorage[key] = JSON.stringify(transacoes);
+        }
+      }
+    }
+    this.contaProvider.update(conta);
+  }
+
+  private findIndex(parcelamento: Parcelamento, parcelamentos: Array<Parcelamento>):number{
+    for (let i = 0; i < parcelamentos.length; i++){
+      if (parcelamentos[i].id == parcelamento.id)
+        return i;
+    }
+    return -1;
+  }
+
+  update(parcelamento: Parcelamento){
+    this.deleteParcelas(parcelamento);
+    const conta = this.contaProvider.get(parcelamento.contaId);
+    const periodo = parcelamento.dataIni.toISOString().substring(0,7);
+    const key = 'p_'+conta.id+'_'+periodo;
+    const parcelamentos = this.getArray(conta, periodo);
+    const index = this.findIndex(parcelamento, parcelamentos);
+    parcelamentos[index] = parcelamento;
+    localStorage[key] = JSON.stringify(parcelamentos);
+    this.insertParcelas(conta, parcelamento);
+  }
+
+  delete(parcelamento: Parcelamento){
+    this.deleteParcelas(parcelamento);
+    const conta = this.contaProvider.get(parcelamento.contaId);
+    const periodo = parcelamento.dataIni.toISOString().substring(0,7);
+    const key = 'p_'+conta.id+'_'+periodo;
+    const parcelamentos = this.getArray(conta, periodo);
+    const index = this.findIndex(parcelamento, parcelamentos);
+    parcelamentos.splice(index, 1);
+    localStorage[key] = JSON.stringify(parcelamentos);
+  }
+
 
 }

@@ -7,7 +7,7 @@ import 'rxjs/add/operator/map';
 
 import { ContaProvider } from '../';
 import { ConfigProvider } from '../config/config';//gambiarra pra solucionar bug
-import { Conta, Transacao} from '../../model';
+import { Transacao} from '../../model';
 
 @Injectable()
 export class TransacaoProvider {
@@ -37,6 +37,21 @@ export class TransacaoProvider {
     return false;    
   }
 
+  getTransacao(object: any):Transacao{
+    const transacao = new Transacao();
+    transacao.id = Number(object.id);
+    transacao.descricao = object.descricao;
+    transacao.contaId = Number(object.contaId);
+    transacao.valor = Number(object.valor);
+    transacao.dataHoraVencimento = new Date(object.dataHoraVencimento);
+    transacao.debitoAutomatico = object.debitoAutomatico;
+    if (object.dataHoraPagamento != null)
+      transacao.dataHoraPagamento = new Date(object.dataHoraPagamento);
+    transacao.parcelamentoId = Number(object.parcelamentoId);
+    transacao.numParcela = Number(object.numParcela);
+    return transacao;
+  }
+
   getArray(contaId: number, periodo: string): Array<Transacao>{
     const transacoes = new Array<Transacao>();
     const conta = this.contaProvider.get(contaId);
@@ -46,17 +61,7 @@ export class TransacaoProvider {
       const array = JSON.parse(data);
       let update = false;
       for (let object of array){
-        const transacao = new Transacao();
-        transacao.id = Number(object.id);
-        transacao.descricao = object.descricao;
-        transacao.contaId = Number(object.contaId);
-        transacao.valor = Number(object.valor);
-        transacao.dataHoraVencimento = new Date(object.dataHoraVencimento);
-        transacao.debitoAutomatico = object.debitoAutomatico;
-        if (object.dataHoraPagamento != null)
-          transacao.dataHoraPagamento = new Date(object.dataHoraPagamento);
-        transacao.parcelamentoId = Number(object.parcelamentoId);
-        transacao.numParcela = Number(object.numParcela);
+        const transacao = this.getTransacao(object);
         transacoes.push(transacao);
         if (this.precisaPagar(transacao)){
           transacao.dataHoraPagamento = new Date();
@@ -111,10 +116,13 @@ export class TransacaoProvider {
     }else if (transacoes[index].foiPaga() && !transacao.foiPaga()){
       conta.subValor(transacao.valor);
       updateConta = true;
+    }else if (transacoes[index].foiPaga() && transacao.foiPaga()){
+      conta.subValor(transacoes[index].valor);
+      conta.addValor(transacao.valor);
+      updateConta = true;
     }
     transacoes[index] = transacao;
     const key = 't_'+transacao.contaId+'_'+transacao.getPeriodo();
-    console.log(transacoes);
     localStorage[key] = JSON.stringify(transacoes);
     if (updateConta){
       this.contaProvider.update(conta);

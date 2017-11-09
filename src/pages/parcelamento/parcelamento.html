@@ -55,6 +55,11 @@
         <ion-checkbox [(ngModel)]="parcelamento.entrada"></ion-checkbox>
       </ion-item>
     <br/>
+    <ion-item>
+        <ion-label>Pagamento automático</ion-label>
+        <ion-checkbox [(ngModel)]="parcelamento.debitoAutomatico"></ion-checkbox>
+      </ion-item>
+    <br/>
     <button [disabled]="!valid" ion-button block (click)="salvaParcelamento()">Salvar</button>
     <br/>
     <button *ngIf="parcelamento.id!=null" color="danger" ion-button block (click)="excluiParcelamento()">Excluir</button>

@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 
 import { TransacoesPage } from '../../pages';
-import { Transacao, Conta } from '../../model';
-import { TransacaoProvider, ContaProvider } from '../../providers';
+import { Transacao } from '../../model';
+import { TransacaoProvider } from '../../providers';
 
 @IonicPage()
 @Component({
@@ -21,8 +21,7 @@ export class CreditoPage {
 
   constructor(public navCtrl: NavController, 
     public navParams: NavParams,
-    private transacaoProvider: TransacaoProvider,
-    private contaProvider: ContaProvider
+    private transacaoProvider: TransacaoProvider
   ) {
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");

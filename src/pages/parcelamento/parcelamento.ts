@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { AlertController } from 'ionic-angular';
 
 import { ParcelamentosPage } from '../../pages';
 import { Parcelamento } from '../../model';
@@ -34,7 +35,8 @@ export class ParcelamentoPage {
     public navCtrl: NavController, 
     public navParams: NavParams, 
     private parcelamentoProvider: ParcelamentoProvider,
-    private configProvider: ConfigProvider
+    private configProvider: ConfigProvider,
+    private alertCtrl: AlertController
   ) {
     if (this.navParams.get('parcelamentoParam') != null){
       this.parcelamento = this.navParams.get('parcelamentoParam');
@@ -43,6 +45,8 @@ export class ParcelamentoPage {
       this.checkForm();
     }else{
       this.parcelamento = new Parcelamento();
+      this.parcelamento.entrada = false;
+      this.parcelamento.debitoAutomatico = false;
     }
     this.parcelamento.contaId = this.configProvider.getIdContaSel();
   }
@@ -116,19 +120,39 @@ export class ParcelamentoPage {
   salvaParcelamento(){
     this.parcelamento.numParcelas = Number(this.parcelamento.numParcelas);//anti-bug
     const tmpValor = this.tipoValor=='total' ? this.valor : (this.valor * this.parcelamento.numParcelas);
-    this.parcelamento.valorTotal = Number(tmpValor * -1);
+    if (this.tipo =='debito')
+      this.parcelamento.valorTotal = Number(tmpValor * -1);
+    else
+      this.parcelamento.valorTotal = Number(tmpValor);
     this.parcelamento.dataIni = new Date(this.dataIni+' 00:00:00');
     if (this.parcelamento.id == null){
       this.parcelamento.id = new Date().getTime();
       this.parcelamentoProvider.insert(this.parcelamento);
     }else{
-      console.log("Não implementado ainda!");
+      this.parcelamentoProvider.update(this.parcelamento);
     }
     this.navCtrl.setRoot(ParcelamentosPage);
   }
 
   excluiParcelamento(){
-    console.log("Não implementado ainda!");
+    let pronptExclude = this.alertCtrl.create({
+      title: 'Atenção!',
+      message: 'Confirma exclusão da nota?',
+      buttons:[
+        {
+          text: 'Sim',
+          handler: data =>{
+            this.parcelamentoProvider.delete(this.parcelamento);
+            this.navCtrl.setRoot(ParcelamentoPage);
+          }
+        },
+        {
+          text: 'Não'
+        }
+      ]
+    });
+    pronptExclude.present();
+    this.navCtrl.setRoot(ParcelamentoPage);
   }
 
 }
