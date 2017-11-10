@@ -7,7 +7,7 @@
 <ion-header>
 
   <ion-navbar>
-    <button ion-button menuToggle>
+    <button ion-button menuToggle [disabled]="wait">
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Definições</ion-title>
@@ -15,18 +15,24 @@
 
 </ion-header>
 <ion-content padding>
+  <button ion-button block color="light" (click)="fazerBackup()" [disabled]="wait">Fazer backup</button>
+  <br/>
+  <button ion-button block color="light" (click)="restaurarBackup()" [disabled]="wait">Restaurar backup</button>
+  <br/>
+  <button ion-button block color="light" (click)="limparBanco()" [disabled]="wait">Limpar banco</button>
+  <br/>
   <ion-item>
     <ion-label color="dark">Notificações ativas: </ion-label>
-    <ion-checkbox [(ngModel)]="notificacoesAtivas"></ion-checkbox>
+    <ion-checkbox [(ngModel)]="notificacoesAtivas" [disabled]="wait"></ion-checkbox>
   </ion-item>
   <ion-item>
     <ion-label color="dark">Horário das notificações: </ion-label>
-    <ion-datetime [disabled]="!notificacoesAtivas" displayFormat="HH:mm" [(ngModel)]="time"></ion-datetime>
+    <ion-datetime [disabled]="!notificacoesAtivas" displayFormat="HH:mm" [(ngModel)]="time" [disabled]="wait"></ion-datetime>
   </ion-item>
   <ion-item>
     <ion-label color="dark">Cria evento calendário: </ion-label>
-    <ion-checkbox [(ngModel)]="notificaCalendario"></ion-checkbox>
+    <ion-checkbox [(ngModel)]="notificaCalendario" [disabled]="wait"></ion-checkbox>
   </ion-item>
   <br/>
-  <button ion-button block (click)="salvarConfigs()">Salvar</button>
+  <button ion-button block (click)="salvarConfigs()" [disabled]="wait">Salvar</button>
 </ion-content>

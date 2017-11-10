@@ -38,9 +38,9 @@ export class NotaPage {
 
   salvar(){
     if (this.nota.id == null)
-      this.notaProvider.insertNota(this.nota);
+      this.notaProvider.insert(this.nota);
     else      
-      this.notaProvider.updateNota(this.nota);
+      this.notaProvider.update(this.nota);
     this.navCtrl.setRoot(NotasPage);
   }
 

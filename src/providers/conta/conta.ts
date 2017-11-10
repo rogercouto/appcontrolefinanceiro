@@ -2,25 +2,30 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
+import { KeyProvider } from '../../providers/key/key';
 import { Conta } from '../../model';
 
 @Injectable()
 export class ContaProvider {
 
-  constructor(public http: Http) {}
+  constructor(public http: Http, private keyProvider: KeyProvider) {}
   
+  private getConta(object: any){
+    const conta = new Conta();
+    conta.id = object.id;
+    conta.descricao = object.descricao;
+    conta.saldo = object.saldo;
+    conta.limite = object.limite;
+    return conta;
+  }
+
   getAll():Array<Conta>{
     const contas = new Array<Conta>();
     const data = localStorage['contas'];
     if (data){
       const array = JSON.parse(data);
       for (let object of array){
-        const conta = new Conta();
-        conta.id = object.id;
-        conta.descricao = object.descricao;
-        conta.saldo = object.saldo;
-        conta.limite = object.limite;
-        contas.push(conta);
+        contas.push(this.getConta(object));
       }
     }
     return contas;
@@ -37,9 +42,17 @@ export class ContaProvider {
 
   insert(conta: Conta){
     const contas = this.getAll();
-    conta.id = new Date().getTime();
+    conta.id = this.keyProvider.genContaKey();
     contas.push(conta);
     localStorage['contas'] = JSON.stringify(contas);
+  }
+
+  insertFromBackup(object: any):number{
+    const conta = this.getConta(object)
+    const contas = this.getAll();
+    contas.push(conta);
+    localStorage['contas'] = JSON.stringify(contas);
+    return conta.id;
   }
 
   private findIndex(conta: Conta, contas: Array<Conta>){

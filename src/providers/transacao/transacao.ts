@@ -7,6 +7,7 @@ import 'rxjs/add/operator/map';
 
 import { ContaProvider } from '../';
 import { ConfigProvider } from '../config/config';//gambiarra pra solucionar bug
+import { KeyProvider } from '../key/key';//gambiarra pra solucionar bug
 import { Transacao} from '../../model';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class TransacaoProvider {
   constructor(public http: Http, 
     private contaProvider: ContaProvider, 
     private configProvider: ConfigProvider,
+    private keyProvider: KeyProvider,
     private localNotifications: LocalNotifications,
     private alertCtrl: AlertController)
   {}
@@ -52,6 +54,24 @@ export class TransacaoProvider {
     return transacao;
   }
 
+  getAll(): Array<Transacao>{
+    const transacoes = new Array<Transacao>();
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,2) == 't_'){
+        const data = localStorage[key];
+        if (data){
+          const array = JSON.parse(data);
+          for (let object of array){
+            const transacao = this.getTransacao(object);
+            transacoes.push(transacao);
+          }
+        }
+      }
+    }
+    return transacoes;
+  }
+
   getArray(contaId: number, periodo: string): Array<Transacao>{
     const transacoes = new Array<Transacao>();
     const conta = this.contaProvider.get(contaId);
@@ -81,7 +101,7 @@ export class TransacaoProvider {
     const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
     const key = 't_'+transacao.contaId+'_'+periodo;
     const transacoes = this.getArray(transacao.contaId, periodo);
-    transacao.id = new Date().getTime();
+    transacao.id = this.keyProvider.genTransacaoKey();
     if (this.precisaPagar(transacao)){
       transacao.dataHoraPagamento = new Date();
       const conta = this.contaProvider.get(transacao.contaId);
@@ -95,6 +115,16 @@ export class TransacaoProvider {
     transacoes.push(transacao);
     localStorage[key] = JSON.stringify(transacoes);
     this.atualizaNotificacoes();
+  }
+
+  insertFromBackup(object: any):number{
+    const transacao = this.getTransacao(object);
+    const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
+    const key = 't_'+transacao.contaId+'_'+periodo;
+    const transacoes = this.getArray(transacao.contaId, periodo);
+    transacoes.push(transacao);
+    localStorage[key] = JSON.stringify(transacoes);
+    return transacao.id;
   }
 
   private findIndex(transacao: Transacao, transacoes: Array<Transacao>){

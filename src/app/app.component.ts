@@ -89,7 +89,7 @@ export class MyApp {
     // Reset the content nav to have just this page
     // we wouldn't want the back button to show in this scenario
     this.page = page;
-    if (this.page == this.pages[1] && this.conta == null){
+    if ((this.page == this.pages[1] ||this.page == this.pages[3])&& this.conta == null){
       let alert = this.alertCtrl.create({
         title: 'Nenhuma conta selecionada',
         subTitle: 'É necessário selecionar uma conta!',

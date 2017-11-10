@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 import { Nota } from '../../model';
+import { KeyProvider } from '../../providers/key/key';
 
 export enum Visibilidade {
   ativas,
@@ -12,9 +13,17 @@ export enum Visibilidade {
 @Injectable()
 export class NotaProvider {
 
-  constructor(public http: Http) {
+  constructor(public http: Http, private keyProvider: KeyProvider) {
   }
 
+  private getNota(object: any):Nota{
+    const nota = new Nota();
+    nota.id = Number(object.id);
+    nota.titulo = object.titulo;
+    nota.texto = object.texto;
+    nota.arquivada = Boolean(object.arquivada);
+    return nota;
+  }
   /**
    * @param visibilidade:
    * 1: Ativas
@@ -31,12 +40,7 @@ export class NotaProvider {
           continue;
         else if (visibilidade == Visibilidade.arquivadas && !Boolean(object.arquivada))  
           continue;
-        const nota = new Nota();
-        nota.id = Number(object.id);
-        nota.titulo = object.titulo;
-        nota.texto = object.texto;
-        nota.arquivada = Boolean(object.arquivada);
-        notas.push(nota);
+        notas.push(this.getNota(object));
       }
     }
     return notas;
@@ -54,11 +58,19 @@ export class NotaProvider {
     return this.getArray();
   }
 
-  insertNota(nota: Nota){
-    nota.id = new Date().getTime();
+  insert(nota: Nota){
+    nota.id = this.keyProvider.genNotaKey();
     const notas = this.getAll();
     notas.push(nota);
     localStorage['notas'] = JSON.stringify(notas);
+  }
+
+  insertFromBackup(object: any):number{
+    const nota = this.getNota(object);
+    const notas = this.getAll();
+    notas.push(nota);
+    localStorage['notas'] = JSON.stringify(notas);
+    return nota.id;
   }
 
   private findIndex(notaId: number, notas: Array<Nota>){
@@ -69,7 +81,7 @@ export class NotaProvider {
     return -1;
   }
 
-  updateNota(nota: Nota){
+  update(nota: Nota){
     const notas = this.getAll();
     const index = this.findIndex(nota.id, notas);
     notas[index] = nota;

@@ -13,27 +13,47 @@ export class ParcelamentoProvider {
     private transacaoProvider: TransacaoProvider) {
   }
 
+  private getParcelamento(object: any):Parcelamento{
+    const parcelamento = new Parcelamento();
+    parcelamento.id = object.id;
+    parcelamento.contaId = object.contaId;
+    parcelamento.descricao = object.descricao;
+    parcelamento.dataIni = new Date(object.dataIni);
+    parcelamento.numParcelas = object.numParcelas;
+    parcelamento.valorTotal = Number(object.valorTotal);
+    parcelamento.entrada = object.entrada;
+    parcelamento.debitoAutomatico = object.debitoAutomatico;
+    return parcelamento;
+  }
+
+  getAll(): Array<Parcelamento>{
+    const parcelamentos = new Array<Parcelamento>();
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,2) == 'p_'){
+        const data = localStorage[key];
+        if (data){
+          const array = JSON.parse(data);
+          for (let object of array){
+            parcelamentos.push(this.getParcelamento(object));
+          }
+        }
+      }
+    }
+    return parcelamentos;
+  }
+
   getArray(conta: Conta, periodo: string):Array<Parcelamento>{
+    const parcelamentos = new Array<Parcelamento>();
     const key = 'p_'+conta.id+'_'+periodo;
     const data = localStorage[key];
     if (data){
       const array = JSON.parse(data);
-      const result = new Array<Parcelamento>();
       for (let object of array){
-        const parcelamento = new Parcelamento();
-        parcelamento.id = object.id;
-        parcelamento.contaId = object.contaId;
-        parcelamento.descricao = object.descricao;
-        parcelamento.dataIni = new Date(object.dataIni);
-        parcelamento.numParcelas = object.numParcelas;
-        parcelamento.valorTotal = Number(object.valorTotal);
-        parcelamento.entrada = object.entrada;
-        parcelamento.debitoAutomatico = object.debitoAutomatico;
-        result.push(parcelamento);
+        parcelamentos.push(this.getParcelamento(object));
       }
-      return result;
     }
-    return new Array<Parcelamento>();
+    return parcelamentos;
   }
   
   private insertParcelas(conta: Conta, parcelamento: Parcelamento){
@@ -73,6 +93,17 @@ export class ParcelamentoProvider {
     parcelamentos.push(parcelamento);
     localStorage[key] = JSON.stringify(parcelamentos);
     this.insertParcelas(conta, parcelamento);   
+  }
+
+  insertFromBackup(object: any):number{
+    const parcelamento = this.getParcelamento(object);
+    const conta = this.contaProvider.get(parcelamento.contaId);
+    const periodo = parcelamento.dataIni.toISOString().substring(0,7);
+    const key = 'p_'+conta.id+'_'+periodo;
+    const parcelamentos = this.getArray(conta, periodo);
+    parcelamentos.push(parcelamento);
+    localStorage[key] = JSON.stringify(parcelamentos);
+    return parcelamento.id;
   }
 
   private getTransacao(object: any):Transacao{

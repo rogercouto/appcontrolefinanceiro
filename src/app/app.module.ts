@@ -8,14 +8,12 @@ import { IonicStorageModule } from '@ionic/storage';
 import { LocalNotifications } from '@ionic-native/local-notifications';
 
 import { MyApp } from './app.component';
+
 import { HomePage, ContaPage, TransacoesPage, DebitoPage, CreditoPage, NotasPage,
   ParcelamentosPage, ParcelamentoPage, NotaPage, ConfigPage, TransferenciaPage } from '../pages';
-import { ContaProvider } from '../providers';
-import { TransacaoProvider } from '../providers/transacao/transacao';
-import { ConfigProvider } from '../providers/config/config';
-import { NotaProvider } from '../providers/nota/nota';
-import { ParcelamentoProvider } from '../providers/parcelamento/parcelamento';
 
+import { ContaProvider, TransacaoProvider, ConfigProvider, NotaProvider, 
+  ParcelamentoProvider, BackupProvider, KeyProvider } from '../providers';
 
 @NgModule({
   declarations: [
@@ -65,7 +63,9 @@ import { ParcelamentoProvider } from '../providers/parcelamento/parcelamento';
     TransacaoProvider,
     ConfigProvider,
     NotaProvider,
-    ParcelamentoProvider
+    ParcelamentoProvider,
+    BackupProvider,
+    KeyProvider
   ]
 })
 export class AppModule {}

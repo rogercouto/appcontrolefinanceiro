@@ -4,7 +4,7 @@ import { AlertController } from 'ionic-angular';
 
 import { ParcelamentosPage } from '../../pages';
 import { Parcelamento } from '../../model';
-import { ParcelamentoProvider, ConfigProvider } from '../../providers';
+import { ParcelamentoProvider, ConfigProvider, KeyProvider } from '../../providers';
 
 /**
  * Generated class for the ParcelamentoPage page.
@@ -36,6 +36,7 @@ export class ParcelamentoPage {
     public navParams: NavParams, 
     private parcelamentoProvider: ParcelamentoProvider,
     private configProvider: ConfigProvider,
+    private keyProvider: KeyProvider,
     private alertCtrl: AlertController
   ) {
     if (this.navParams.get('parcelamentoParam') != null){
@@ -126,7 +127,7 @@ export class ParcelamentoPage {
       this.parcelamento.valorTotal = Number(tmpValor);
     this.parcelamento.dataIni = new Date(this.dataIni+' 00:00:00');
     if (this.parcelamento.id == null){
-      this.parcelamento.id = new Date().getTime();
+      this.parcelamento.id = this.keyProvider.genParcelamentoKey();
       this.parcelamentoProvider.insert(this.parcelamento);
     }else{
       this.parcelamentoProvider.update(this.parcelamento);

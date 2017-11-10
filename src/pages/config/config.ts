@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 
-import { ConfigProvider, TransacaoProvider } from '../../providers';
+import { ConfigProvider, ContaProvider, TransacaoProvider, NotaProvider,
+   ParcelamentoProvider, BackupProvider, KeyProvider } from '../../providers';
+import { Backup } from '../../model';
 /**
  * Generated class for the ConfigPage page.
  *
@@ -20,10 +22,17 @@ export class ConfigPage {
   private notificacoesAtivas: boolean;
   private notificaCalendario: boolean;
 
+  private wait = false;
+
   constructor(public navCtrl: NavController, 
     public navParams: NavParams, 
     private configProvider: ConfigProvider,
-    private transacaoProvider: TransacaoProvider
+    private contaProvider: ContaProvider,
+    private transacaoProvider: TransacaoProvider,
+    private notaProvider: NotaProvider,
+    private parcelamentoProvider: ParcelamentoProvider,
+    private keyProvider: KeyProvider,
+    private backupProvider: BackupProvider,
   ) {
     this.notificacoesAtivas = this.configProvider.isNotificacoesAtivas();
     const horario = this.configProvider.getHorarioNotificacao();
@@ -40,6 +49,176 @@ export class ConfigPage {
 
   ionViewDidLoad() {}
 
+  private getContaArray(backupId: number){
+    const contas = this.contaProvider.getAll();
+    const array = new Array<any>();
+    for (const conta of contas){
+      const object = {id: conta.id, backupId: backupId, descricao: conta.descricao,
+        saldo: conta.saldo, limite: conta.limite};
+      array.push(object);
+    }
+    return array;
+  }
+
+  private getNotaArray(backupId: number){
+    const notas = this.notaProvider.getAll();
+    const array = new Array<any>();
+    for (const nota of notas){
+      const object = {id: nota.id, backupId: backupId, titulo: nota.titulo,
+         texto: nota.texto, arquivada: nota.arquivada};
+      array.push(object);
+    }
+    return array;
+  }
+
+  private getTransacaoArray(backupId: number){
+    const transacoes = this.transacaoProvider.getAll();
+    const array = new Array<any>();
+    for (const transacao of transacoes){
+      const object = {
+        id: transacao.id,
+        backupId: backupId,
+        contaId: transacao.contaId,
+        descricao: transacao.descricao,
+        valor: transacao.valor,
+        dataHoraVencimento: transacao.dataHoraVencimento,
+        debitoAutomatico: transacao.debitoAutomatico,
+        dataHoraPagamento: transacao.dataHoraPagamento,
+        parcelamentoId: transacao.parcelamentoId,
+        numParcela: transacao.numParcela
+      };
+      array.push(object);
+    }
+    return array;
+  }
+  
+  private getParcelamentoArray(backupId: number){
+    const parcelamentos = this.parcelamentoProvider.getAll();
+    const array = new Array<any>();
+    for (const parcelamento of parcelamentos){
+      const object = {
+        id: parcelamento.id,
+        backupId: backupId,
+        contaId: parcelamento.contaId,
+        descricao: parcelamento.descricao,
+        dataIni: parcelamento.dataIni,
+        numParcelas: parcelamento.numParcelas,
+        valorTotal: parcelamento.valorTotal,
+        entrada: parcelamento.entrada,
+        debitoAutomatico: parcelamento.debitoAutomatico
+      };
+      array.push(object);
+    }
+    return array;
+  }
+
+  fazerBackup(){
+    const backup = new Backup(
+      this.keyProvider.genBackupKey(),
+      this.configProvider.getUsuarioId(),
+      new Date()
+    );
+    this.wait = true;
+    this.backupProvider.salvaBackup(backup).subscribe( res => {
+      console.log(res);
+      this.backupProvider.salvaContas(this.getContaArray(backup.id)).subscribe( res=>{
+        console.log(res);
+        this.backupProvider.salvaNotas(this.getNotaArray(backup.id)).subscribe( res=>{
+          console.log(res);
+          this.backupProvider.salvaTransacoes(this.getTransacaoArray(backup.id)).subscribe( res=>{
+            console.log(res);
+            this.backupProvider.salvaParcelamentos(this.getParcelamentoArray(backup.id)).subscribe( res=>{
+              console.log(res);
+              this.wait = false;
+            });  
+          });
+        });
+      });
+    });
+  }
+
+  haveData(key: string){
+    const keys = ['keyGen','contas','contaSel','paginaSel','notas',
+      'notificacoesAtivas','horarioNot','usaCalendario'];
+    for (let k of keys){
+      if (k == key)
+        return true;
+    }
+    if (key.substring(0, 2) == 't_' || key.substring(0, 2) == 'p_')
+      return true;
+    return false;
+  }
+
+  limparBanco(){
+    const keys = Array<string>();
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (this.haveData(key))
+        keys.push(key);
+    }
+    for(let key of keys){
+      localStorage.removeItem(key);
+    }
+    this.configProvider.selecionaPagina(0);
+  }
+
+  restaurarBackup(){
+    this.keyProvider.initialize();
+    let lastKey;
+    this.wait = true;
+    this.backupProvider.restauraBackup().subscribe(
+      backups => {
+        const backup = backups[0];
+        this.keyProvider.setBackupKey(backup.id);
+        this.backupProvider.restauraContas(backup.id).subscribe(
+          contas => {
+            lastKey = 0;
+            for (const conta of contas){
+              this.contaProvider.insertFromBackup(conta);
+              if (conta.id > lastKey)
+                lastKey = conta.id;
+            }
+            this.keyProvider.setContaKeyKey(lastKey);
+            this.backupProvider.restauraNotas(backup.id).subscribe(
+              notas => {
+                lastKey = 0;
+                for (const nota of notas){
+                  this.notaProvider.insertFromBackup(nota);
+                  if (nota.id > lastKey)
+                    lastKey = nota.id;
+                }
+                this.keyProvider.setNotaKey(lastKey);
+                this.backupProvider.restauraTransacoes(backup.id).subscribe(
+                  transacoes => {
+                    lastKey = 0;
+                    for (const transacao of transacoes){
+                      this.transacaoProvider.insertFromBackup(transacao);
+                      if (transacao.id > lastKey)
+                        lastKey = transacao.id;
+                    }          
+                    this.keyProvider.setTransacaoKey(lastKey);
+                    this.backupProvider.restauraParcelamentos(backup.id).subscribe(
+                      parcelamentos => {
+                        lastKey = 0;
+                        for (const parcelamento of parcelamentos){
+                          this.parcelamentoProvider.insertFromBackup(parcelamento);
+                          if (parcelamento.id > lastKey)
+                            lastKey = parcelamento.id;
+                        }  
+                        this.keyProvider.setParcelamentoKey(lastKey);
+                        this.wait = false;
+                      }
+                    );
+                  }
+                );                
+              }
+            );             
+          }
+        );     
+      }
+    );
+  }
+
   salvarConfigs(){
     this.configProvider.setNotificacoesAtivas(this.notificacoesAtivas);
     const h = Number(this.time.substring(0,2));
@@ -48,5 +227,5 @@ export class ConfigPage {
     this.configProvider.setNotificacaoCalendario(this.notificaCalendario);
     this.transacaoProvider.atualizaNotificacoes();
   }
-
+ 
 }

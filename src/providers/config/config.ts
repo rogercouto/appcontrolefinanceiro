@@ -64,4 +64,8 @@ export class ConfigProvider {
     return data ? Boolean(JSON.parse(data)) : false;
   }
 
+  getUsuarioId(){
+    return 1;//arrumar depois
+  }
+
 }
