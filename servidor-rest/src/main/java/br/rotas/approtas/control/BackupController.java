@@ -40,8 +40,4 @@ public class BackupController {
         }
     }
     
-    public static void main(String[] args){
-        Backup backup = new Backup();
-        
-    }
 }

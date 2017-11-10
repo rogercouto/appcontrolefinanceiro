@@ -7,6 +7,14 @@
   <ion-content>
     <ion-list>
       <ion-item color="light">
+        {{conectado? (usuario==null?'Desconectado':usuario.email) : 'Servidor offline!'}}
+        <button [disabled]="!conectado" ion-button outline item-end icon-left (click)="login()">
+          <ion-icon *ngIf="usuario==null" name="log-in"></ion-icon>
+          <ion-icon *ngIf="usuario!=null" name="log-out"></ion-icon>
+          {{usuario==null? 'Log-in' : 'Log-out'}}
+        </button>
+      </ion-item>
+      <ion-item color="light">
         <ion-label>Conta:</ion-label>
         <ion-select style="max-width: 100%" interface="popover" [(ngModel)]="conta" [compareWith]="comparaConta" (ionChange)="trocaConta(conta)">
           <ion-option *ngFor="let conta of contas" [value]="conta">{{conta.descricao}}</ion-option>

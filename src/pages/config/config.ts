@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { AlertController } from 'ionic-angular';
+
 
 import { ConfigProvider, ContaProvider, TransacaoProvider, NotaProvider,
    ParcelamentoProvider, BackupProvider, KeyProvider } from '../../providers';
@@ -22,6 +24,7 @@ export class ConfigPage {
   private notificacoesAtivas: boolean;
   private notificaCalendario: boolean;
 
+  private conectado = false;
   private wait = false;
 
   constructor(public navCtrl: NavController, 
@@ -33,6 +36,7 @@ export class ConfigPage {
     private parcelamentoProvider: ParcelamentoProvider,
     private keyProvider: KeyProvider,
     private backupProvider: BackupProvider,
+    private alertCtrl: AlertController
   ) {
     this.notificacoesAtivas = this.configProvider.isNotificacoesAtivas();
     const horario = this.configProvider.getHorarioNotificacao();
@@ -45,9 +49,11 @@ export class ConfigPage {
       this.time += '0';
     this.time += horario.m;
     this.notificaCalendario = this.configProvider.isNotificaCalendario();
+    this.testaConexao();
   }
 
-  ionViewDidLoad() {}
+  ionViewDidLoad() {
+  }
 
   private getContaArray(backupId: number){
     const contas = this.contaProvider.getAll();
@@ -112,6 +118,29 @@ export class ConfigPage {
     return array;
   }
 
+  alertErroConexao(){
+    let alert = this.alertCtrl.create({
+      title: 'Atenção',
+      subTitle: 'Não foi possível se conectar com o servidor!',
+      buttons : ["Ok"]
+    });
+    alert.present();
+  }
+
+  private testaConexao(){
+    if (this.configProvider.getUsuario() == null)
+      return false;
+    this.backupProvider.testaConnexao().subscribe(
+      res => {
+        if (res !== 'e'){
+          this.conectado = true;
+        }else{
+          this.conectado = false;
+        }
+      }
+    );
+  }
+
   fazerBackup(){
     const backup = new Backup(
       this.keyProvider.genBackupKey(),
@@ -119,21 +148,26 @@ export class ConfigPage {
       new Date()
     );
     this.wait = true;
-    this.backupProvider.salvaBackup(backup).subscribe( res => {
-      console.log(res);
-      this.backupProvider.salvaContas(this.getContaArray(backup.id)).subscribe( res=>{
+    this.backupProvider.salvaBackup(backup).subscribe(res => {
+      if (res !== 'e') {
         console.log(res);
-        this.backupProvider.salvaNotas(this.getNotaArray(backup.id)).subscribe( res=>{
+        this.backupProvider.salvaContas(this.getContaArray(backup.id)).subscribe( res=>{
           console.log(res);
-          this.backupProvider.salvaTransacoes(this.getTransacaoArray(backup.id)).subscribe( res=>{
+          this.backupProvider.salvaNotas(this.getNotaArray(backup.id)).subscribe( res=>{
             console.log(res);
-            this.backupProvider.salvaParcelamentos(this.getParcelamentoArray(backup.id)).subscribe( res=>{
+            this.backupProvider.salvaTransacoes(this.getTransacaoArray(backup.id)).subscribe( res=>{
               console.log(res);
-              this.wait = false;
-            });  
+              this.backupProvider.salvaParcelamentos(this.getParcelamentoArray(backup.id)).subscribe( res=>{
+                console.log(res);
+                this.wait = false;
+              });  
+            });
           });
         });
-      });
+      }else{
+        console.log('Erro ao se contectar!');
+        this.wait = false;
+      }
     });
   }
 
@@ -150,6 +184,49 @@ export class ConfigPage {
   }
 
   limparBanco(){
+    let alert = this.alertCtrl.create({
+        title: 'Atenção',
+        subTitle: 'Tem certesa que deseja excluir os dados locais?',
+        buttons : [
+          {
+            text: "Ok",
+            handler: data => {
+              this.excluiDadosLocais();
+              this.navCtrl.setRoot(ConfigPage);
+            }
+          },
+          {
+            text: "Cancelar",
+          }
+        ]
+    });
+    alert.present();
+  }
+
+  restaurarBackup(){
+    let alert = this.alertCtrl.create({
+      title: 'Atenção',
+      subTitle: 'Tem certesa que deseja susbtituir os dados locais pelo backup?',
+      buttons : [
+        {
+          text: "Ok",
+          handler: data => {
+            try {
+              this.restauraUltimoBackup();
+            } catch (error) {
+              this.alertErroConexao();
+            }
+          }
+        },
+        {
+          text: "Cancelar",
+        }
+      ]
+    });
+    alert.present();
+  }
+
+  private excluiDadosLocais(){
     const keys = Array<string>();
     for (let i = 0; i < localStorage.length; i++){
       const key = localStorage.key(i);
@@ -162,12 +239,17 @@ export class ConfigPage {
     this.configProvider.selecionaPagina(0);
   }
 
-  restaurarBackup(){
+  private restauraUltimoBackup(){
+    this.excluiDadosLocais();
     this.keyProvider.initialize();
     let lastKey;
     this.wait = true;
     this.backupProvider.restauraBackup().subscribe(
       backups => {
+        if (backups.length == 0){
+          this.wait = false;
+          return;
+        }
         const backup = backups[0];
         this.keyProvider.setBackupKey(backup.id);
         this.backupProvider.restauraContas(backup.id).subscribe(
@@ -219,13 +301,20 @@ export class ConfigPage {
     );
   }
 
-  salvarConfigs(){
+  salvaNotificacoesAtivas(){
     this.configProvider.setNotificacoesAtivas(this.notificacoesAtivas);
+    this.transacaoProvider.atualizaNotificacoes();
+  }
+
+  salvaHorarioNotificacao(){
     const h = Number(this.time.substring(0,2));
     const m = Number(this.time.substring(3,5));
     this.configProvider.setHorarioNotificacao(h, m);
-    this.configProvider.setNotificacaoCalendario(this.notificaCalendario);
     this.transacaoProvider.atualizaNotificacoes();
   }
- 
+
+  salvaNotificaCalendario(){
+    this.configProvider.setNotificacaoCalendario(this.notificaCalendario);
+  }
+
 }
