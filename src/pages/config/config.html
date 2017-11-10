@@ -22,19 +22,16 @@
   <button ion-button block color="light" (click)="limparBanco()" [disabled]="wait">Limpar banco</button>
   <br/>
   <ion-item>
-    <ion-label color="dark">Notificações ativas</ion-label>
+    <ion-label>Notificações ativas</ion-label>
     <ion-checkbox [(ngModel)]="notificacoesAtivas" [disabled]="wait" (ionChange)="salvaNotificacoesAtivas()"></ion-checkbox>
+  </ion-item>
+  <ion-item>
+    <ion-label>Cria evento calendário </ion-label>
+    <ion-checkbox [(ngModel)]="notificaCalendario" (ionChange)="salvaNotificaCalendario()" [disabled]="wait"></ion-checkbox>
   </ion-item>
   <ion-item>
     <ion-label color="dark">Horário das notificações: </ion-label>
     <ion-datetime [disabled]="!notificacoesAtivas || wait" displayFormat="HH:mm"
       (ionChange)="salvaHorarioNotificacao()" [(ngModel)]="time"></ion-datetime>
   </ion-item>
-  <!--
-  <ion-item>
-    <ion-label color="dark">Cria evento calendário</ion-label>
-    <ion-checkbox [(ngModel)]="notificaCalendario" [disabled]="wait" 
-      (ionChange)="salvaNotificaCalendario()"></ion-checkbox>
-  </ion-item>
-  -->
 </ion-content>

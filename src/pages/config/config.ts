@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 
-
 import { ConfigProvider, ContaProvider, TransacaoProvider, NotaProvider,
    ParcelamentoProvider, BackupProvider, KeyProvider } from '../../providers';
 import { Backup } from '../../model';

@@ -1,9 +1,13 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Calendar } from '@ionic-native/calendar';
+
+import { Geolocation } from '@ionic-native/geolocation';
+import { NativeGeocoder, NativeGeocoderReverseResult } from '@ionic-native/native-geocoder';
 
 import { TransacoesPage } from '../../pages';
 import { Transacao } from '../../model';
-import { TransacaoProvider } from '../../providers';
+import { TransacaoProvider, ConfigProvider } from '../../providers';
 /**
  * Generated class for the DebitoPage page.
  *
@@ -18,18 +22,29 @@ import { TransacaoProvider } from '../../providers';
 })
 export class DebitoPage {
 
-  public valid: boolean = false;
-  
+  public valid: boolean = false;  
   public transacao: Transacao;
   public dataVenc: string;
   public valor: string;
+  public local = "";
 
   public colors: Array<string> = ["dark","dark","dark"];
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
-    private transacaoProvider: TransacaoProvider
+    private transacaoProvider: TransacaoProvider,
+    private configProvider: ConfigProvider,
+    private calendar: Calendar,
+    private geolocation: Geolocation,
+    private nativeGeocoder: NativeGeocoder
   ) {
+    this.geolocation.getCurrentPosition().then((resp) => {
+      this.nativeGeocoder.reverseGeocode(resp.coords.latitude, resp.coords.longitude)
+      .then((result: NativeGeocoderReverseResult) => this.local = result.locality.toString())
+      .catch((error: any) => console.log(error));
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
     if (navParams.get("transacaoParam")!= null){
       this.transacao = navParams.get("transacaoParam");
       this.dataVenc = this.transacao.dataHoraVencimento.toISOString().substring(0,10);
@@ -90,10 +105,24 @@ export class DebitoPage {
       this.transacaoProvider.insert(this.transacao);
     else
       this.transacaoProvider.update(this.transacao);
+    if (!this.transacao.debitoAutomatico && this.configProvider.isNotificaCalendario()){
+      const dataIni = this.transacao.dataHoraVencimento;
+      const hNot = this.configProvider.getHorarioNotificacao();
+      dataIni.setHours(hNot.h);
+      dataIni.setMinutes(hNot.m);
+      const dataFim = dataIni;
+      dataFim.setHours(Number(hNot.h+1));
+      const valor = (this.transacao.valor*-1).toFixed(0).replace('.',',');
+      if (dataIni > new Date()){
+        this.calendar.createEventInteractively("Débito: "+this.transacao.descricao+" - R$"+
+          valor, this.local, null, dataIni, dataFim);
+      }
+    }  
     this.navCtrl.setRoot(TransacoesPage);
   }
 
   ionViewDidLoad() {
+    
   }
 
 }

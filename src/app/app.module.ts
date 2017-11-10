@@ -6,6 +6,9 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { IonicStorageModule } from '@ionic/storage';
 import { LocalNotifications } from '@ionic-native/local-notifications';
+import { Calendar } from '@ionic-native/calendar';
+import { Geolocation } from '@ionic-native/geolocation';
+import { NativeGeocoder } from '@ionic-native/native-geocoder';
 
 import { MyApp } from './app.component';
 
@@ -58,6 +61,9 @@ import { ContaProvider, TransacaoProvider, ConfigProvider, NotaProvider,
     StatusBar,
     SplashScreen,
     LocalNotifications,
+    Calendar,
+    Geolocation,
+    NativeGeocoder,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     ContaProvider,
     TransacaoProvider,
