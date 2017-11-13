@@ -191,6 +191,7 @@ export class ConfigPage {
             text: "Ok",
             handler: data => {
               this.excluiDadosLocais();
+              this.keyProvider.initialize();
               this.navCtrl.setRoot(ConfigPage);
             }
           },
