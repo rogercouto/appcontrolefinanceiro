@@ -3,11 +3,13 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Contas</ion-title>
+    <ion-title>{{contas.length==0?'Home' : 'Contas'}}</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
+  <h5 *ngIf="contas.length==0">Controle Financeiro</h5>
+  <p *ngIf="contas.length==0">Insira uma conta para gerenciar</p>
   <ion-card *ngFor="let conta of contas">
     <ion-card-header>
         <ion-item>
