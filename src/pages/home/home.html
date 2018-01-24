@@ -16,13 +16,6 @@
             <ion-label>{{conta.descricao}}</ion-label>
             <ion-radio value="selection" [checked]="isSel(conta)" (click)="selecionaConta(conta)"></ion-radio>
         </ion-item>
-        <!--
-          &nbsp;
-        <ion-icon *ngIf="isSel(conta)" name="checkmark" color="secondary" style="font-size: 30px"></ion-icon>
-        <button *ngIf="!isSel(conta)" (click)="selecionaConta(conta)" ion-button icon-only color="light">
-            <ion-icon name="checkmark-circle"></ion-icon>
-        </button>
-      -->
     </ion-card-header>
     <ion-card-content>
       <p>Saldo R$: {{conta.saldo.toFixed(2).toString().replace('.',',')}}</p>

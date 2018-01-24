@@ -43,6 +43,24 @@ export class ParcelamentoProvider {
     return parcelamentos;
   }
 
+  getDateRange(): {min:string, max:string}{
+    let minDate = new Date('2027-01-01');
+    let maxDate = new Date('2017-01-01');
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,2) == 'p_'){
+        const stringArray = key.split('_');
+        let date = new Date(stringArray[2]+'-01 00:00:00');
+        if (date < minDate)
+          minDate = date;
+        if (date > maxDate)
+          maxDate = date;
+      }
+    }
+    maxDate.setDate(31);
+    return {min: minDate.toISOString().substring(0,10), max: maxDate.toISOString().substring(0,10)};
+  }
+
   getArray(conta: Conta, periodo: string):Array<Parcelamento>{
     const parcelamentos = new Array<Parcelamento>();
     const key = 'p_'+conta.id+'_'+periodo;

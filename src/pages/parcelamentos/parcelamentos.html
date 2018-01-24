@@ -15,12 +15,21 @@
       <br/><br/>
       <ion-item>
         <ion-label>Período:</ion-label>
-        <ion-datetime  displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
+        <ion-datetime  min="{{dateRange.min}}" max="{{dateRange.max}}" displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
       </ion-item>
       <ion-list>
         <button color="light" ion-item *ngFor="let parcelamento of parcelamentos" (click)="editaParcelamento(parcelamento)">
+          <ion-icon name="{{ (parcelamento.valorTotal < 0 ? 'remove-circle' : 'add-circle')}}"
+          color="{{ (parcelamento.valorTotal < 0 ? 'danger' : 'secondary')}}" style="font-size: 15px;"></ion-icon>
           {{ parcelamento.descricao }}<br/> 
-          Total: {{parcelamento.valorTotal.toFixed(2).replace('.',',') }} - 
+          Total: R$ 
+          <span *ngIf="parcelamento.valorTotal<0" style="color: red">
+            {{(parcelamento.valorTotal*-1).toFixed(2).replace('.',',') }}
+          </span>
+          <span *ngIf="parcelamento.valorTotal>=0" style="color: green">
+            {{parcelamento.valorTotal.toFixed(2).replace('.',',') }}
+          </span>
+           - 
           Parcelas: {{parcelamento.numParcelas}}
         </button>  
       </ion-list>

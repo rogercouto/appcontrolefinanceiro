@@ -33,7 +33,7 @@
       </ion-grid>
       <ion-item>
           <ion-label>Período:</ion-label>
-          <ion-datetime  displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
+          <ion-datetime min="{{dateRange.min}}" max="{{dateRange.max}}" displayFormat="MMM YYYY" [(ngModel)]="periodo" (ionChange)="refresh()"></ion-datetime>
       </ion-item>
       <ion-item *ngIf="transacoes.length>1">
           <ion-icon item-start style="width:20px"></ion-icon>
@@ -46,6 +46,10 @@
               <ion-icon name="{{ sortByPag==1 ? 'arrow-dropdown' : 'arrow-dropup'}}"></ion-icon>
           </button>
           <ion-icon item-end style="width:20px"></ion-icon>
+      </ion-item>
+      <ion-item *ngIf="aviso">
+          <span style="color: red;font-weight: bold">Saldo insuficiente!</span><br />
+          <span style="color: red">Pagamentos autimáticos pendentes.</span>
       </ion-item>
       <ion-list>
           <!-- 'trending-down' : 'trending-up' border-radius: 50%; background-color: #DDD; -->

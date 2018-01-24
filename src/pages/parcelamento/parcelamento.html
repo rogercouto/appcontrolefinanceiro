@@ -18,7 +18,7 @@
     <ion-item>
         <ion-label floating [color]="colors[1]">Data inicial</ion-label>
         <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY"
-          [(ngModel)]="dataIni" (ionChange)="checkData()"></ion-datetime>
+            max="2117-12-31" [(ngModel)]="dataIni" (ionChange)="checkData()"></ion-datetime>
     </ion-item>
     <ion-item>
         <ion-label color="dark">Informado:</ion-label>

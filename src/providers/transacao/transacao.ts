@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import { ContaProvider } from '../';
 import { ConfigProvider } from '../config/config';//gambiarra pra solucionar bug
 import { KeyProvider } from '../key/key';//gambiarra pra solucionar bug
-import { Transacao} from '../../model';
+import { Transacao, Conta} from '../../model';
 
 @Injectable()
 export class TransacaoProvider {
@@ -72,6 +72,46 @@ export class TransacaoProvider {
     return transacoes;
   }
 
+  getDateRange(): {min:string, max:string}{
+    let minDate = new Date('2027-01-01');
+    let maxDate = new Date('2017-01-01');
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.substring(0,2) == 't_'){
+        const stringArray = key.split('_');
+        let date = new Date(stringArray[2]+'-01 00:00:00');
+        if (date < minDate)
+          minDate = date;
+        if (date > maxDate)
+          maxDate = date;
+      }
+    }
+    maxDate.setDate(31);
+    return {min: minDate.toISOString().substring(0,10), max: maxDate.toISOString().substring(0,10)};
+  }
+
+  mostraAlerta(titulo: string, mensagem: string) {
+    let alert = this.alertCtrl.create({
+      title: titulo,
+      message: mensagem,
+      buttons: ['Ok']
+    });
+    alert.present();
+  }
+
+  temSaldo(conta: Conta, array : Array<Transacao>): boolean {
+    for (let object of array){
+      const transacao = this.getTransacao(object);
+      if (this.precisaPagar(transacao)){
+        conta.saldo = Number(conta.saldo + transacao.valor);
+        if (conta.saldo < conta.limite){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   getArray(contaId: number, periodo: string): Array<Transacao>{
     const transacoes = new Array<Transacao>();
     const conta = this.contaProvider.get(contaId);
@@ -84,9 +124,11 @@ export class TransacaoProvider {
         const transacao = this.getTransacao(object);
         transacoes.push(transacao);
         if (this.precisaPagar(transacao)){
-          transacao.dataHoraPagamento = new Date();
           conta.saldo = Number(conta.saldo + transacao.valor);
-          update = true;
+          if (conta.saldo >= conta.limite){
+            transacao.dataHoraPagamento = new Date();
+            update = true;
+          }
         }
       }
       if (update){
@@ -103,10 +145,14 @@ export class TransacaoProvider {
     const transacoes = this.getArray(transacao.contaId, periodo);
     transacao.id = this.keyProvider.genTransacaoKey();
     if (this.precisaPagar(transacao)){
-      transacao.dataHoraPagamento = new Date();
       const conta = this.contaProvider.get(transacao.contaId);
-      conta.addValor(transacao.valor);
-      this.contaProvider.update(conta);
+      if (conta.saldo >= conta.getSaldoDisponivel()){
+        conta.addValor(transacao.valor);
+        this.contaProvider.update(conta);
+        transacao.dataHoraPagamento = new Date();
+      }else{
+        this.mostraAlerta('Saldo insuficiente!','Pagamento em aberto!');
+      }
     }else if (transacao.foiPaga()){
       const conta = this.contaProvider.get(transacao.contaId);
       conta.addValor(transacao.valor);

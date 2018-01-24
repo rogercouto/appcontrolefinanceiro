@@ -23,12 +23,14 @@
     </ion-item>
     <ion-item>
         <ion-label floating [color]="colors[2]">Vencimento</ion-label>
-        <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY"
+        <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY" max="2117-12-31"
+          [disabled]="transacao.id!=null"
           name="dataVenc" [(ngModel)]="dataVenc" (ionChange)="checkVenc()"></ion-datetime>
     </ion-item>
     <ion-item>
       <ion-label>Pagamento automático</ion-label>
-      <ion-checkbox name="debitoAutomatico" [(ngModel)]="transacao.debitoAutomatico"></ion-checkbox>
+      <ion-checkbox name="debitoAutomatico" [(ngModel)]="transacao.debitoAutomatico"
+        [disabled]="disableAuto"></ion-checkbox>
     </ion-item>
     <br/>
     <button [disabled]="!valid" ion-button block type="submit">Salvar</button>

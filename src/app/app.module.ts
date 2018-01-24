@@ -9,6 +9,8 @@ import { LocalNotifications } from '@ionic-native/local-notifications';
 import { Calendar } from '@ionic-native/calendar';
 import { Geolocation } from '@ionic-native/geolocation';
 import { NativeGeocoder } from '@ionic-native/native-geocoder';
+import { File } from '@ionic-native/file';
+import { FileChooser } from '@ionic-native/file-chooser';
 
 import { MyApp } from './app.component';
 
@@ -71,7 +73,9 @@ import { ContaProvider, TransacaoProvider, ConfigProvider, NotaProvider,
     NotaProvider,
     ParcelamentoProvider,
     BackupProvider,
-    KeyProvider
+    KeyProvider,
+    File,
+    FileChooser
   ]
 })
 export class AppModule {}

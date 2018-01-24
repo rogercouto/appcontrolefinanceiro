@@ -6,8 +6,8 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { NativeGeocoder, NativeGeocoderReverseResult } from '@ionic-native/native-geocoder';
 
 import { TransacoesPage } from '../../pages';
-import { Transacao } from '../../model';
-import { TransacaoProvider, ConfigProvider } from '../../providers';
+import { Transacao, Conta } from '../../model';
+import { TransacaoProvider, ContaProvider, ConfigProvider } from '../../providers';
 /**
  * Generated class for the DebitoPage page.
  *
@@ -22,10 +22,12 @@ import { TransacaoProvider, ConfigProvider } from '../../providers';
 })
 export class DebitoPage {
 
-  public valid: boolean = false;  
+  public valid: boolean = false; 
+  public conta: Conta; 
   public transacao: Transacao;
   public dataVenc: string;
   public valor: string;
+  public disableAuto: boolean = true;
   public local = "";
 
   public colors: Array<string> = ["dark","dark","dark"];
@@ -33,6 +35,7 @@ export class DebitoPage {
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
     private transacaoProvider: TransacaoProvider,
+    private contaProvider: ContaProvider,
     private configProvider: ConfigProvider,
     private calendar: Calendar,
     private geolocation: Geolocation,
@@ -54,6 +57,7 @@ export class DebitoPage {
       this.transacao = new Transacao();
       this.transacao.contaId = navParams.get("contaIdParam");
     } 
+    this.conta = this.contaProvider.get(this.transacao.contaId);
   }
 
   checkDescr(): void{
@@ -65,12 +69,28 @@ export class DebitoPage {
     this.checkForm();
   }
 
+  checkAuto(){
+    this.disableAuto = this.conta.getSaldoDisponivel() < Number(this.valor);
+    if (this.dataVenc != undefined){
+      const date = new Date(this.dataVenc+' 00:00:00'); 
+      const now = new Date();
+      now.setHours(0);
+      now.setMinutes(0);
+      now.setSeconds(0);
+      now.setMilliseconds(0);
+      if (date > now){
+        this.disableAuto = false;
+      }
+    }
+  }
+
   checkValor(): void{
     if (Number(this.valor) != undefined && Number(this.valor) != 0){
       this.colors[1] = "secondary";
     }else{
       this.colors[1] = "danger";
     }
+    this.checkAuto();
     this.checkForm();
   }
 
@@ -80,6 +100,7 @@ export class DebitoPage {
     }else{
       this.colors[2] = "danger";
     }
+    this.checkAuto();
     this.checkForm();
   }
 
@@ -121,8 +142,6 @@ export class DebitoPage {
     this.navCtrl.setRoot(TransacoesPage);
   }
 
-  ionViewDidLoad() {
-    
-  }
+  ionViewDidLoad() {}
 
 }

@@ -22,6 +22,8 @@ export class ParcelamentosPage {
   private parcelamentos : Array<Parcelamento>;
   private periodo: string;
 
+  public dateRange: {min:string, max:string};
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
@@ -30,6 +32,7 @@ export class ParcelamentosPage {
     private configProvider: ConfigProvider
   ) {
     this.periodo = new Date().toISOString().substring(0, 7);
+    this.dateRange = this.parcelamentoProvider.getDateRange();    
     this.refresh();
   }
   

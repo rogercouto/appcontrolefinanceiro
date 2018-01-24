@@ -31,6 +31,8 @@ export class TransacoesPage {
 
   public sortByDate:number = 1;
   public sortByPag:number = 1;
+  public dateRange: {min:string, max:string};
+  public aviso:boolean = false;
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
@@ -41,6 +43,7 @@ export class TransacoesPage {
   ) {
     const contaId = this.configProvider.getIdContaSel();
     this.conta = this.contaProvider.get(contaId);
+    this.dateRange = this.transacaoProvider.getDateRange();
   }
 
   ionViewDidLoad() {
@@ -109,6 +112,7 @@ export class TransacoesPage {
         return  (t2.dataHoraVencimento.getTime() - t1.dataHoraVencimento.getTime()) * sd;
     });
     this.calculaBalanco();
+    this.aviso = !this.transacaoProvider.temSaldo(this.conta, this.transacoes);
   }
 
   debito(){

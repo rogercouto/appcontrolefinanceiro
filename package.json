@@ -22,6 +22,9 @@
     "@angular/platform-browser-dynamic": "4.4.4",
     "@ionic-native/calendar": "^4.4.0",
     "@ionic-native/core": "4.3.2",
+    "@ionic-native/file": "^4.5.2",
+    "@ionic-native/file-chooser": "^4.5.2",
+    "@ionic-native/file-path": "^4.5.2",
     "@ionic-native/geolocation": "^4.4.0",
     "@ionic-native/google-maps": "^4.4.0",
     "@ionic-native/local-notifications": "^4.3.3",
@@ -34,6 +37,9 @@
     "cordova-plugin-calendar": "^4.6.0",
     "cordova-plugin-compat": "^1.2.0",
     "cordova-plugin-device": "^1.1.4",
+    "cordova-plugin-file": "^5.0.0",
+    "cordova-plugin-filechooser": "^1.0.1",
+    "cordova-plugin-filepath": "^1.1.0",
     "cordova-plugin-geolocation": "^2.4.3",
     "cordova-plugin-googlemaps": "^2.1.1",
     "cordova-plugin-ionic-webview": "^1.1.16",
@@ -69,7 +75,10 @@
         "API_KEY_FOR_ANDROID": "YOUR_ANDROID_API_KEY_IS_HERE",
         "API_KEY_FOR_IOS": "YOUR_IOS_API_KEY_IS_HERE"
       },
-      "cordova-plugin-nativegeocoder": {}
+      "cordova-plugin-nativegeocoder": {},
+      "cordova-plugin-filechooser": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-filepath": {}
     },
     "platforms": [
       "android"

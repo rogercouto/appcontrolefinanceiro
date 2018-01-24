@@ -23,7 +23,7 @@
       </ion-item>
       <ion-item>
           <ion-label floating [color]="colors[2]">Vencimento</ion-label>
-          <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY"
+          <ion-datetime displayFormat="DD / MM / YYYY" pickerFormat="DD MMM YYYY" max="2117-12-31"
             name="dataVenc" [(ngModel)]="dataVenc" (ionChange)="checkVenc()"></ion-datetime>
       </ion-item>
       <ion-item>

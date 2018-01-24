@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
+import { File } from '@ionic-native/file';
+import { FileChooser } from '@ionic-native/file-chooser';
 
 import { ConfigProvider, ContaProvider, TransacaoProvider, NotaProvider,
    ParcelamentoProvider, BackupProvider, KeyProvider } from '../../providers';
@@ -35,7 +37,9 @@ export class ConfigPage {
     private parcelamentoProvider: ParcelamentoProvider,
     private keyProvider: KeyProvider,
     private backupProvider: BackupProvider,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private file: File,
+    private fileChooser: FileChooser
   ) {
     this.notificacoesAtivas = this.configProvider.isNotificacoesAtivas();
     const horario = this.configProvider.getHorarioNotificacao();
@@ -139,8 +143,44 @@ export class ConfigPage {
       }
     );
   }
+  
+  mostraAlerta(titulo: string, mensagem: string) {
+    let alert = this.alertCtrl.create({
+      title: titulo,
+      message: mensagem,
+      buttons: ['Ok']
+    });
+    alert.present();
+  }
 
-  fazerBackup(){
+  backupOffline(){
+    let date = new Date();
+    let fileName = 'BKP_';
+    fileName += date.getDay();
+    fileName += '-';
+    fileName += date.getMonth();
+    fileName += '-';
+    fileName += date.getFullYear();
+    fileName += '_';
+    fileName += date.getTime();
+    fileName += '.txt';
+    let texto = '';
+    for (let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      texto += key;
+      texto += '|';
+      texto += localStorage[key];
+      texto += ';';
+    } 
+    this.file.writeFile(this.file.externalRootDirectory, fileName, texto, {replace:true}).then(()=>{
+      this.mostraAlerta('Sucesso!','Arquivo de backup '+fileName+' salvo na raiz do sistema de arquivos!');
+    }).catch(error =>{
+      this.mostraAlerta('Erro','Erro ao fazer backup');
+    });
+
+  }
+  
+  backupOnline(){
     const backup = new Backup(
       this.keyProvider.genBackupKey(),
       this.configProvider.getUsuarioId(),
@@ -168,6 +208,13 @@ export class ConfigPage {
         this.wait = false;
       }
     });
+  }
+
+  fazerBackup(){
+    if (this.conectado)
+      this.backupOnline();
+    else
+      this.backupOffline();
   }
 
   haveData(key: string){
@@ -203,19 +250,20 @@ export class ConfigPage {
     alert.present();
   }
 
-  restaurarBackup(){
+  restauraServidor(){
     let alert = this.alertCtrl.create({
       title: 'Atenção',
       subTitle: 'Tem certesa que deseja susbtituir os dados locais pelo backup?',
       buttons : [
         {
-          text: "Ok",
+          text: "Sim",
           handler: data => {
+            this.excluiDadosLocais();
             try {
               this.restauraUltimoBackup();
             } catch (error) {
               this.alertErroConexao();
-            }
+            }              
           }
         },
         {
@@ -224,6 +272,48 @@ export class ConfigPage {
       ]
     });
     alert.present();
+    
+  }
+
+  restauraArquivo(){
+    this.fileChooser.open()
+    .then(uri => {
+      const dirName = uri.substring(0, uri.length-31);
+      const fileName = uri.substring(uri.length-31, uri.length);
+      this.file.readAsText(dirName, fileName).then(text=>{
+        let alert = this.alertCtrl.create({
+          title: 'Atenção',
+          subTitle: 'Tem certesa que deseja susbtituir os dados locais pelo backup?',
+          buttons : [
+            {
+              text: "Sim",
+              handler: data => {
+                this.excluiDadosLocais();
+                const lines = text.split(';');
+                for (const line of lines){
+                  const array = line.split('|');
+                  localStorage[array[0]] = array[1];
+                }
+                this.mostraAlerta('Sucesso!', 'Dados restaurados!');
+              }
+            },
+            {
+              text: "Cancelar",
+            }
+          ]
+        });
+        alert.present();
+      });
+    })
+    .catch(e => console.log(e));
+  }
+
+  restaurarBackup(){
+    if (this.conectado){
+      this.restauraServidor();
+    }else{
+      this.restauraArquivo();
+    }
   }
 
   private excluiDadosLocais(){
@@ -240,7 +330,6 @@ export class ConfigPage {
   }
 
   private restauraUltimoBackup(){
-    this.excluiDadosLocais();
     this.keyProvider.initialize();
     let lastKey;
     this.wait = true;

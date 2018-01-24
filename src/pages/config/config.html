@@ -15,10 +15,10 @@
 
 </ion-header>
 <ion-content padding>
-  <button ion-button block color="light" (click)="fazerBackup()" [disabled]="wait||!conectado">Fazer backup</button>
-  <br/>
-  <button ion-button block color="light" (click)="restaurarBackup()" [disabled]="wait||!conectado">Restaurar backup</button>
-  <br/>
+  <button ion-button block color="light" (click)="fazerBackup()" [disabled]="wait">Fazer backup</button>
+  <br />
+  <button ion-button block color="light" (click)="restaurarBackup()" [disabled]="wait">Restaurar backup</button>
+  <br />
   <button ion-button block color="light" (click)="limparBanco()" [disabled]="wait">Limpar banco</button>
   <br/>
   <ion-item>
