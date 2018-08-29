@@ -99,8 +99,8 @@ export class TransacoesPage {
   }
 
   refresh(){
-    this.conta = this.contaProvider.get(this.configProvider.getIdContaSel());
     this.transacoes = this.transacaoProvider.getArray(this.conta.id, this.periodo);
+    this.conta = this.contaProvider.get(this.configProvider.getIdContaSel());
     const sd = this.sortByDate;
     const sp = this.sortByPag;
     this.transacoes.sort(function(t1:Transacao,t2:Transacao){

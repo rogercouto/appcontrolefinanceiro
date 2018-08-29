@@ -55,6 +55,7 @@ export class TransacaoProvider {
   }
 
   getAll(): Array<Transacao>{
+    console.log('ue?');
     const transacoes = new Array<Transacao>();
     for (let i = 0; i < localStorage.length; i++){
       const key = localStorage.key(i);
@@ -99,12 +100,17 @@ export class TransacaoProvider {
     alert.present();
   }
 
+  /**
+   * Verifica se tem saldo para pagar as transações com débito automático
+   * @param conta
+   * @param array 
+   */
   temSaldo(conta: Conta, array : Array<Transacao>): boolean {
     for (let object of array){
       const transacao = this.getTransacao(object);
       if (this.precisaPagar(transacao)){
-        conta.saldo = Number(conta.saldo + transacao.valor);
-        if (conta.saldo < conta.limite){
+        conta.saldo = Number(conta.saldo + transacao.valor + conta.limite);
+        if (conta.saldo < 0){
           return false;
         }
       }
@@ -112,6 +118,40 @@ export class TransacaoProvider {
     return true;
   }
 
+  /**
+   * Retorna a lista de transações sem fazer update
+   * @param contaId
+   * @param periodo 
+   */
+  getArray(contaId: number, periodo: string): Array<Transacao>{
+    const transacoes = new Array<Transacao>();
+    const conta = this.contaProvider.get(contaId);
+    const key = 't_'+conta.id+'_'+periodo;
+    const data = localStorage[key];
+    let update = false;
+    if (data){
+      const array = JSON.parse(data);
+      for (let object of array){
+        const transacao = this.getTransacao(object);
+        transacoes.push(transacao);
+        if (this.precisaPagar(transacao)){
+          const saldoApos = conta.saldo + transacao.valor;
+          if (Number(saldoApos+conta.limite) >= 0){
+            transacao.dataHoraPagamento = new Date();
+            conta.saldo = saldoApos;
+            update = true;
+          }
+        }
+      }
+    }
+    if (update){
+      localStorage[key] = JSON.stringify(transacoes);//atualiza as transações
+      this.contaProvider.update(conta);
+    }
+    return transacoes;
+  }
+
+  /*
   getArray(contaId: number, periodo: string): Array<Transacao>{
     const transacoes = new Array<Transacao>();
     const conta = this.contaProvider.get(contaId);
@@ -124,8 +164,8 @@ export class TransacaoProvider {
         const transacao = this.getTransacao(object);
         transacoes.push(transacao);
         if (this.precisaPagar(transacao)){
-          conta.saldo = Number(conta.saldo + transacao.valor);
-          if (conta.saldo >= conta.limite){
+          conta.saldo = Number(conta.saldo + transacao.valor + conta.limite);
+          if (conta.saldo >= 0){
             transacao.dataHoraPagamento = new Date();
             update = true;
           }
@@ -138,6 +178,7 @@ export class TransacaoProvider {
     }
     return transacoes;
   }
+  */
 
   insert(transacao: Transacao){
     const periodo = transacao.dataHoraVencimento.toISOString().substring(0, 7);
@@ -146,7 +187,8 @@ export class TransacaoProvider {
     transacao.id = this.keyProvider.genTransacaoKey();
     if (this.precisaPagar(transacao)){
       const conta = this.contaProvider.get(transacao.contaId);
-      if (conta.saldo >= conta.getSaldoDisponivel()){
+      const saldoApos = conta.saldo + conta.limite + transacao.valor;
+      if (saldoApos >= 0){
         conta.addValor(transacao.valor);
         this.contaProvider.update(conta);
         transacao.dataHoraPagamento = new Date();
